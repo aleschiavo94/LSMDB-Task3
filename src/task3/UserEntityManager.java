@@ -49,4 +49,5 @@ public class UserEntityManager {
 	        UserEntityManager greeter = new UserEntityManager( "bolt://localhost:7687", "neo4j", "password" );
 	        greeter.printGreeting( "hello, world" );
 	    }
+	   
 }
