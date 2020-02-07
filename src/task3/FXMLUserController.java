@@ -1,4 +1,4 @@
-package movietimejpa;
+package task3;
 
 import java.io.IOException;
 
@@ -190,11 +190,11 @@ public class FXMLUserController implements Initializable {
 		
 				Rental r = new Rental(current_user, f, stDate, eDate, tot);
 			
-				UserEntityManager.insertRental(r);
+				//UserEntityManager.insertRental(r);
 			
 				//decreasing user's credit and updating the value
 				current_user.setCredit(current_user.getCredit() - tot);
-				UserEntityManager.updateUserInfo(current_user);
+				//UserEntityManager.updateUserInfo(current_user);
 		
 				film_in_cart.clear();
 			}
@@ -214,8 +214,8 @@ public class FXMLUserController implements Initializable {
 		rentals.clear();
 		User tmp;
 	
-        tmp = new User(UserEntityManager.refreshUser(current_user));
-        current_user = tmp;
+        //tmp = new User(UserEntityManager.refreshUser(current_user));
+        //current_user = tmp;
         rentals.addAll(current_user.getRentals());
 		//rentals.addAll(user_man.searchRentalByUser(current_user));
 		
@@ -312,7 +312,7 @@ public class FXMLUserController implements Initializable {
 		
 		User tmp = null;
 		
-		tmp = new User(UserEntityManager.refreshUser(current_user));
+		//tmp = new User(UserEntityManager.refreshUser(current_user));
 		current_user = tmp;
 		
 		
@@ -362,7 +362,7 @@ public class FXMLUserController implements Initializable {
 			current_user.setCredit(current_user.getCredit() + dep);
 		
 		
-		UserEntityManager.updateUserInfo(current_user);
+		//UserEntityManager.updateUserInfo(current_user);
 		initUserInfo();
 
 	}
@@ -386,7 +386,7 @@ public class FXMLUserController implements Initializable {
 		}
 		
 	
-		UserEntityManager.removeUser(current_user, film_in_db);
+		//UserEntityManager.removeUser(current_user, film_in_db);
 		
 		//closing the window
 		 Parent root;
