@@ -38,19 +38,29 @@ public class UserEntityManager {
 	    //LOGIN FUNCTIONS
 	    public static User login(String username, String password) {
 	    	User user = null;
-	    	
 	    	try(Session session = driver.session()){
-	    		session.readTransaction(new TransactionWork<User>() {
+	    		
+	    		user = session.readTransaction(new TransactionWork<User>() {
 	    			@Override
 	    			public User execute(Transaction tx) {
+	    				User u = null;
 	    				List<Pair<String, Value>> list;
 	    				list = new ArrayList<Pair<String, Value>>(matchUsernamePassword(tx, username, password));
 	    				
-	    				Iterator iterator = list.iterator();
-	    			    while(iterator.hasNext()) {
-	    			    	System.out.println(iterator.next());
-	    			    }
-	    				return user;
+	    				for (Pair<String,Value> nameValue: list) {
+	    				        Value value = nameValue.value();
+	    				        
+	    				        int id = value.get("id").asInt();
+	    				        String username = value.get("username").asString();
+	    				        String password = value.get("password").asString();
+	    				        String surname = value.get("surname").asString();
+	    				        String name = value.get("name").asString();
+	    				        int credit = value.get("credit").asInt();
+	    				        String email = value.get("email").asString();
+	    				        
+	    				        u = new User(id, username, password, name, surname, email, credit);
+	    				}
+	    				return u;
 	    			}
 	    		});
 	    	}
