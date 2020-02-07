@@ -1,47 +1,58 @@
 package task3;
 
-import org.neo4j.driver.AuthTokens;
-import org.neo4j.driver.Driver;
-import org.neo4j.driver.GraphDatabase;
-import org.neo4j.driver.Session;
-import org.neo4j.driver.Transaction;
-import org.neo4j.driver.TransactionWork;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.neo4j.driver.*;
+import org.neo4j.driver.v1.AuthTokens;
+import org.neo4j.driver.v1.Driver;
+import org.neo4j.driver.v1.GraphDatabase;
+import org.neo4j.driver.v1.Session;
+import org.neo4j.driver.v1.StatementResult;
+import org.neo4j.driver.v1.Transaction;
+import org.neo4j.driver.v1.TransactionWork;
 
 
 public class UserEntityManager {
 
 	    // Driver objects are thread-safe and are typically made available application-wide.
-	    private final Driver driver;
-
-	    public UserEntityManager( String uri, String user, String password )
-	    {
-	        driver = GraphDatabase.driver( uri, AuthTokens.basic( user, password ) );
+	    private final static Driver driver;
+	    private static UserEntityManager userEntityManager;
+	    
+	    static {	
+	    	//Constructing the Driver instance on startup
+	    	driver = GraphDatabase.driver( "bolt://localhost:7687", AuthTokens.basic( "neo4j", "fede95" ) );
 	    }
 
-	    public void close() throws Exception
-	    {
+
+	    public void close() throws Exception{
 	        driver.close();
 	    }
-
-	    public void printGreeting( final String message )
-	    {
-	        try ( Session session = driver.session() )
-	        {
-	            String greeting = session.writeTransaction( new TransactionWork<String>()
-	            {
-	                @Override
-	                public String execute( Transaction tx )
-	                {
-	                    StatementResult result = tx.run( "CREATE (a:Greeting) " +
-	                                                     "SET a.message = $message " +
-	                                                     "RETURN a.message + ', from node ' + id(a)",
-	                            parameters( "message", message ) );
-	                    return result.single().get( 0 ).asString();
-	                }
-	            } );
-	            System.out.println( greeting );
-	        }
+	    
+	    //LOGIN FUNCTIONS
+	    public static User login(String username, String password) {
+	    	User user = null;
+	    	
+	    	try(Session session = driver.session()){
+	    		session.readTransaction(new TransactionWork<Long>() {
+	    			@Override
+	    			public Long execute(Transaction tx) {
+	    				return matchUsernamePassword(tx, username, password);
+	    			}
+	    		});
+	    	}
+	    	return user;
+	    }
+	    
+	    private static long matchUsernamePassword(Transaction tx, String user, String pwd) {
+	    	Map<String, Object> params = new HashMap<>();
+	           params.put("username", user);
+	           params.put("password",pwd);
+	           
+	    	StatementResult result = tx.run("MATCH (ee:Users{username: $username, password: $password}) RETURN ee;",
+	    			params);
+	    	
+	    	return result.single().get(0).asLong();
 	    }
 
 	    public static void main( String... args ) throws Exception
@@ -49,5 +60,5 @@ public class UserEntityManager {
 	        UserEntityManager greeter = new UserEntityManager( "bolt://localhost:7687", "neo4j", "password" );
 	        greeter.printGreeting( "hello, world" );
 	    }
-	   
+
 }
