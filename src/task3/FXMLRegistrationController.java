@@ -1,4 +1,4 @@
-package movietimejpa;
+package task3;
 
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -70,7 +70,7 @@ public class FXMLRegistrationController implements Initializable{
         	return;
         }
         
-      
+        
         UserEntityManager.insertUser(u);
         
         

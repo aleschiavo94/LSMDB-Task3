@@ -52,7 +52,8 @@ public class FXMLDocumentController implements Initializable {
         user =  UserEntityManager.login(username_string, password_string);      
        
         if(user != null) {//if the user is registrated
-        	//creating a new window 
+        	System.out.println("dentro");
+/*        	//creating a new window 
             Stage dialogStage = new Stage();
             Scene scene;
             Node source = (Node) event.getSource();
@@ -85,7 +86,7 @@ public class FXMLDocumentController implements Initializable {
             scene = new Scene(root);
             dialogStage.setTitle(user.getUsername());
             dialogStage.setScene(scene);
-            dialogStage.show(); 		
+            dialogStage.show(); 		 */
          }else { //if the user is not registrated visualize message error
             username_field.clear();
             password_field.clear();

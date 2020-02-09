@@ -7,7 +7,7 @@
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.text.Font?>
 
-<Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="388.0" prefWidth="368.0" style="-fx-background-color: #023A6B; -fx-border-color: #00142C; -fx-border-width: 3px;" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="movietimejpa.FXMLRegistrationController">
+<Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="388.0" prefWidth="368.0" style="-fx-background-color: #023A6B; -fx-border-color: #00142C; -fx-border-width: 3px;" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="task3.FXMLRegistrationController">
    <children>
       <Label layoutX="115.0" layoutY="22.0" style="-fx-font-weight: bold; -fx-font-size: 18;" text="Registration form" textFill="#ffcc00">
          <font>

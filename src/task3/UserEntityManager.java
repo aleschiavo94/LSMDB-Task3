@@ -10,6 +10,7 @@ import org.neo4j.driver.*;
 import org.neo4j.driver.v1.AuthTokens;
 import org.neo4j.driver.v1.Driver;
 import org.neo4j.driver.v1.GraphDatabase;
+import org.neo4j.driver.v1.Record;
 import org.neo4j.driver.v1.Session;
 import org.neo4j.driver.v1.StatementResult;
 import org.neo4j.driver.v1.Transaction;
@@ -35,7 +36,12 @@ public class UserEntityManager {
 	        driver.close();
 	    }
 	    
-	    //LOGIN FUNCTIONS
+	    
+	    /* 
+	     * LOGIN FUNCTIONS
+	     */
+	    
+	    //login to the system
 	    public static User login(String username, String password) {
 	    	User user = null;
 	    	try(Session session = driver.session()){
@@ -44,21 +50,22 @@ public class UserEntityManager {
 	    			@Override
 	    			public User execute(Transaction tx) {
 	    				User u = null;
-	    				List<Pair<String, Value>> list;
-	    				list = new ArrayList<Pair<String, Value>>(matchUsernamePassword(tx, username, password));
 	    				
-	    				for (Pair<String,Value> nameValue: list) {
-	    				        Value value = nameValue.value();
+	    				StatementResult result = matchUsernamePassword(tx, username, password);
+	    				
+	    				
+	    				while (result.hasNext()) {
+	    					Record record = result.next();
+	    				      
+	    				    int id = record.get("id").asInt();
+	    				    String username = record.get("username").asString();
+	    				    String password = record.get("password").asString();
+	    				    String surname = record.get("surname").asString();
+	    				    String name = record.get("name").asString();
+	    				    int credit = record.get("credit").asInt();
+	    			        String email = record.get("email").asString();
 	    				        
-	    				        int id = value.get("id").asInt();
-	    				        String username = value.get("username").asString();
-	    				        String password = value.get("password").asString();
-	    				        String surname = value.get("surname").asString();
-	    				        String name = value.get("name").asString();
-	    				        int credit = value.get("credit").asInt();
-	    				        String email = value.get("email").asString();
-	    				        
-	    				        u = new User(id, username, password, name, surname, email, credit);
+	    			        u = new User(id, username, password, name, surname, email, credit);
 	    				}
 	    				return u;
 	    			}
@@ -67,15 +74,112 @@ public class UserEntityManager {
 	    	return user;
 	    }
 	    
-	    private static List<Pair<String, Value >> matchUsernamePassword(Transaction tx, String user, String pwd) {
+	    //finding the node with username and password
+	    private static StatementResult matchUsernamePassword(Transaction tx, String user, String pwd) {
 	    	Map<String, Object> params = new HashMap<>();
 	           params.put("username", user);
 	           params.put("password",pwd);
 	           
-	    	StatementResult result = tx.run("MATCH (ee:Users{username: $username, password: $password}) RETURN ee;",
+	    	StatementResult result = tx.run("MATCH (ee:Users{username: $username, password: $password}) "
+	    			+ "RETURN ee.id AS id, ee.username AS username, ee.password AS password,"
+	    			+ "ee.surname AS surname, ee.name AS name, ee.credit AS credit, ee.email AS email;",
 	    			params);
 	    	
-	    	return result.single().fields();
+	    	return result;
 	    }
-
+	    
+	    
+	    
+	    /*
+	     * SIGN UP FUNCTIONS
+	     */
+	    
+	    //finding if the user is already signed up
+	    public static boolean findIfNotExist(User new_user) {
+	    	boolean exists;
+	    	try(Session session = driver.session()){
+	    		exists = session.readTransaction(new TransactionWork<Boolean>() {
+	    			@Override
+	    			public Boolean execute(Transaction tx) {
+	    				Boolean sign=false;
+	    				
+	    				StatementResult result = matchUsernamePassword(tx, new_user.getUsername(), new_user.getPassword());
+	    				if(result.hasNext()) {
+	    					return sign;
+	    				}else {
+	    					sign=true;
+	    					return sign;
+	    				}
+	    			}
+	    		});
+	    	}
+	    	
+	    	return exists;
+	    } 
+	    
+	    
+	    //inserting a new user
+	    public static void insertUser(User u) {
+	    	try(Session session = driver.session()){
+	    		session.writeTransaction(new TransactionWork<Void>() {
+	    			@Override
+	    			public Void execute(Transaction tx) {
+	    				
+	    				createUserNode(tx, u);
+	    				return null;
+	    			}
+	    		});
+	    	}
+	    }
+	    
+	    //creating a new user node
+	    private static void createUserNode(Transaction tx, User user) {
+	    	Map<String, Object> params = new HashMap<>();
+	    		params.put("id", user.getIdUser());
+	    		params.put("name", user.getName());
+	    		params.put("surname", user.getSurname());
+	    		params.put("username", user.getUsername());
+	    		params.put("password", user.getPassword());
+	    		params.put("credit", user.getCredit());
+	    		params.put("email", user.getEmail());
+	           
+	    	tx.run("CREATE(a:Users{id: $id, name: $name, surname: $surname,"
+	    			+ "username: $username, password: $password, credit: $credit,"
+	    			+ "email: $email})", params);
+	    	
+	    }
+	    
+	    
+	    /*
+	     * USER CONTROLLER FUNCTIONS
+	     */
+	    
+	    public static List<Film> getFilms(){
+	    	List<Film> list;
+	    	
+	    	try(Session session = driver.session()){
+	    		list = session.readTransaction(new TransactionWork<List<Film>>() {
+	    			@Override
+	    			public List<Film> execute(Transaction tx) {
+	    				List<Film> films;
+	    				
+	    				StatementResult result = matchFilms(tx);
+	    				
+	    				while(result.hasNext()) {
+	    					Record record = result.next();
+	    					
+	    					
+	    				}
+	    			}
+	    		});
+	    	}
+	    	
+	    	return list;
+	    }
+	    
+	    
+	    private static StatementResult matchFilms(Transaction tx){
+	    	StatementResult result=tx.run("MATCH(ff:Movies) RETURN ff;");
+	    	return result;
+	    }
 }
