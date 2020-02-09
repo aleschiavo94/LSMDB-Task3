@@ -78,10 +78,4 @@ public class UserEntityManager {
 	    	return result.single().fields();
 	    }
 
-	    public static void main( String... args ) throws Exception
-	    {
-	        UserEntityManager greeter = new UserEntityManager( "bolt://localhost:7687", "neo4j", "password" );
-	        greeter.printGreeting( "hello, world" );
-	    }
-
 }
