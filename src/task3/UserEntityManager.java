@@ -324,7 +324,7 @@ public class UserEntityManager {
 	    	Map<String, Object> params = new HashMap<>();
     		params.put("username", u.getUsername());
     		
-    		List<Record> result = tx.run("MATCH (ee:Users) WHERE ee.username <> $username "
+    		List<Record> result = tx.run("MATCH (ee:Users) WHERE ee.username <> $username AND ee.username <> 'admin' "
 	    			+ "RETURN ee.id AS id, ee.username AS username, ee.password AS password,"
 	    			+ "ee.surname AS surname, ee.name AS name, ee.credit AS credit, ee.email AS email;", params).list();
 	    	
