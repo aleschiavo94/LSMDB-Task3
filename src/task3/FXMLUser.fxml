@@ -13,12 +13,59 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
 
 <TabPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="550.0" prefWidth="621.0" side="LEFT" tabClosingPolicy="UNAVAILABLE" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="task3.FXMLUserController">
   <tabs>
       <Tab text="Suggested movies">
         <content>
-          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+               <children>
+                  <Pane prefHeight="550.0" prefWidth="591.0">
+                     <children>
+                        <TableView fx:id="film_follower" layoutX="14.0" layoutY="49.0" onMouseClicked="#showDetails" prefHeight="214.0" prefWidth="260.0">
+                           <columns>
+                              <TableColumn fx:id="title_column1" editable="false" prefWidth="259.1999683380127" text="Title" />
+                           </columns>
+                        </TableView>
+                        <Text layoutX="13.0" layoutY="39.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Suggest movies by followed user">
+                           <font>
+                              <Font size="18.0" />
+                           </font>
+                        </Text>
+                        <TableView fx:id="film_category" layoutX="317.0" layoutY="49.0" onMouseClicked="#showDetails" prefHeight="214.0" prefWidth="260.0">
+                           <columns>
+                              <TableColumn fx:id="title_column11" editable="false" prefWidth="259.1999683380127" text="Title" />
+                           </columns>
+                        </TableView>
+                        <Text layoutX="335.0" layoutY="38.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Suggest movies by category">
+                           <font>
+                              <Font size="18.0" />
+                           </font>
+                        </Text>
+                        <TableView fx:id="top_rate_film" layoutX="14.0" layoutY="322.0" onMouseClicked="#showDetails" prefHeight="214.0" prefWidth="260.0">
+                           <columns>
+                              <TableColumn fx:id="title_column111" editable="false" prefWidth="259.1999683380127" text="Title" />
+                           </columns>
+                        </TableView>
+                        <Text layoutX="74.0" layoutY="310.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Top rated movies">
+                           <font>
+                              <Font size="18.0" />
+                           </font>
+                        </Text>
+                        <TableView fx:id="most_rent_film" layoutX="317.0" layoutY="322.0" onMouseClicked="#showDetails" prefHeight="214.0" prefWidth="260.0">
+                           <columns>
+                              <TableColumn fx:id="title_column1111" editable="false" prefWidth="259.1999683380127" text="Title" />
+                           </columns>
+                        </TableView>
+                        <Text layoutX="368.0" layoutY="311.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Most rented movies">
+                           <font>
+                              <Font size="18.0" />
+                           </font>
+                        </Text>
+                     </children>
+                  </Pane>
+               </children></AnchorPane>
         </content>
       </Tab>
     <Tab text="Search a movie">
@@ -65,10 +112,9 @@
                <children>
                   <TableView fx:id="rental_table" layoutX="21.0" layoutY="151.0" onMouseClicked="#getSelectedRent" prefHeight="270.0" prefWidth="360.0">
                     <columns>
-                      <TableColumn fx:id="rental_id_column" prefWidth="80.79998779296875" text="Rental ID" />
-                      <TableColumn fx:id="rental_startDate_column" minWidth="0.0" prefWidth="100.79999542236328" text="Start Date" />
-                        <TableColumn fx:id="rental_endDate_column" prefWidth="89.60003662109375" text="End Date" />
-                        <TableColumn fx:id="rental_price_column" prefWidth="89.60003662109375" text="Total Price" />
+                      <TableColumn fx:id="rental_startDate_column" minWidth="0.0" prefWidth="120.0" text="Start Date" />
+                        <TableColumn fx:id="rental_endDate_column" prefWidth="120.0" text="End Date" />
+                        <TableColumn fx:id="rental_price_column" prefWidth="120.0" text="Total Price" />
                     </columns>
                   </TableView>
                   <TableView fx:id="rented_film_table" layoutX="416.0" layoutY="151.0" prefHeight="216.0" prefWidth="145.0">
@@ -81,7 +127,38 @@
          </content></Tab>
       <Tab text="Users">
         <content>
-          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+               <children>
+                  <Pane prefHeight="550.0" prefWidth="590.0">
+                     <children>
+                        <TableView fx:id="all_user" layoutX="84.0" layoutY="50.0" onMouseClicked="#showDetails" prefHeight="490.0" prefWidth="195.0">
+                           <columns>
+                              <TableColumn fx:id="title_column2" editable="false" prefWidth="195.0" text="Username" />
+                           </columns>
+                        </TableView>
+                        <TableView fx:id="follow_user" layoutX="309.0" layoutY="50.0" onMouseClicked="#showDetails" prefHeight="410.0" prefWidth="195.0">
+                           <columns>
+                              <TableColumn fx:id="title_column21" editable="false" prefWidth="195.0" text="Username" />
+                           </columns>
+                        </TableView>
+                        <Text layoutX="148.0" layoutY="31.0" strokeType="OUTSIDE" strokeWidth="0.0" text="All users">
+                           <font>
+                              <Font size="18.0" />
+                           </font>
+                        </Text>
+                        <Text layoutX="352.0" layoutY="32.0" strokeType="OUTSIDE" strokeWidth="0.0" text="User followed">
+                           <font>
+                              <Font size="18.0" />
+                           </font>
+                        </Text>
+                        <Button fx:id="follow" layoutX="309.0" layoutY="506.0" mnemonicParsing="false" prefHeight="34.0" prefWidth="195.0" style="-fx-background-color: red;" text="Follow!" textFill="WHITE">
+                           <font>
+                              <Font name="System Bold" size="14.0" />
+                           </font>
+                        </Button>
+                     </children>
+                  </Pane>
+               </children></AnchorPane>
         </content>
       </Tab>
       <Tab closable="false" onSelectionChanged="#initUserInfo" text="Profile">
