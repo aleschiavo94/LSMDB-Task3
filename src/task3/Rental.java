@@ -12,20 +12,21 @@ import javafx.beans.property.*;
 
 
 public class Rental {
-    private final int idRental;
+   // private final int idRental;
     private final LocalDate startDate;
     private final LocalDate endDate;
     private final int totalPrice;
-    private User user;
-    private Set<Film> listFilm;
+    //private User user;
+    private String username;
+    private String listFilm;
     
-    public Rental( int idN, User u, List<Film> list, LocalDate stDate, LocalDate eDate, int totp){
+    public Rental( /*int idN, User u,*/String user, String list, LocalDate stDate, LocalDate eDate, int totp){
     	
-        this.idRental = idN ;
-        this.user = new User(u);
+        //this.idRental = idN ;
+        //this.user = new User(u);
         //this.listFilm = new ArrayList<>();
-        listFilm = new HashSet<Film>();
-        this.listFilm.addAll(list);
+    	this.username=user;
+        this.listFilm= list;
        
         this.startDate = (stDate);
         this.endDate = (eDate);
@@ -34,45 +35,46 @@ public class Rental {
     }
     
     public Rental() {
-    	this.idRental = 0;
+    	//this.idRental = 0;
     	this.startDate = LocalDate.now();
     	this.endDate = LocalDate.now();
     	this.totalPrice = 0;
     	
     }
     
-    public Rental(User u, List<Film> list, LocalDate stDate, LocalDate eDate, int totp) {
-    	this.idRental = (0);
+    /*
+    public Rental(User u, String list, LocalDate stDate, LocalDate eDate, int totp) {
+    	//this.idRental = (0);
     	this.user = new User(u);
-    	listFilm = new HashSet<Film>(list);
+    	listFilm = list;
        
         this.startDate = (stDate);
         this.endDate = (eDate);
         this.totalPrice = (totp);
         
         
-    }
+    } */
     
     public Rental(Rental n){
     	
-        this.idRental = (n.getIdRental());
-        this.user = n.getUser();
+        //this.idRental = (n.getIdRental());
+        this.username = n.getUser();
        // this.listFilm = new ArrayList<>();
-        this.listFilm = new HashSet<Film>();
-        this.listFilm.addAll(n.getFilmList());
+        
+        this.listFilm=n.getFilmList();
         this.startDate = (n.getStartDate());
         this.endDate = (n.getEndDate());
         this.totalPrice = (n.getTotalPrice());
         
     }
     
-
+/*
     public int getIdRental(){
         return this.idRental;
-    }
+    } */
     
     
-    public Set<Film> getFilmList(){
+    public String getFilmList(){
     	
         return this.listFilm;
     }
@@ -87,8 +89,8 @@ public class Rental {
     }
     
     
-    public User getUser() {
-    	return this.user;
+    public String getUser() {
+    	return this.username;
     }
     
 }

@@ -28,9 +28,9 @@ public class User {
     private int credit;
     
     
-    private Set<Rental> rentals;
+    //private Set<Rental> rentals;
     
-    private Set<Rating> ratings;
+    //private Set<Rating> ratings;
     
     public User(int idUser, String username, String psw, String name, String surn, String email, int credit) {
     	
@@ -70,8 +70,8 @@ public class User {
     	this.surname = (u.getSurname());
     	this.email = (u.getEmail());
     	this.credit = (u.getCredit());
-    	this.rentals = new HashSet<Rental>();
-    	rentals = u.getRentals();
+    	//this.rentals = new HashSet<Rental>();
+    	//rentals = u.getRentals();
     }
     
     public int getIdUser(){
@@ -107,9 +107,9 @@ public class User {
     	this.credit= (credit);
     }
     
-    
+    /*
     public Set<Rental> getRentals(){
     	return this.rentals;
-    }
+    } */
     
 }

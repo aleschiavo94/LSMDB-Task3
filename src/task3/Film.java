@@ -1,6 +1,7 @@
 package task3;
 
 
+import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -11,9 +12,9 @@ import javafx.beans.property.*;
 public class Film {
 	private final int idFilm;
 	private final String title;
-	private final List<String> genre;
+	private final String genre;
 	private final String plot;
-	private final int release_year;
+	private final String release_year;
 	private final int weekly_price;
 	private final String production_company;
 	private final int budget;
@@ -26,13 +27,13 @@ public class Film {
 		this.production_company="";
 		this.genre=null;
 		this.title = "";
-		this.release_year= 0;
+		this.release_year= null;
 		this.weekly_price = 0;
 		this.plot = "";
 		this.budget=0;
 	}
 	
-	public Film(int idFilm, String title, List<String> genre, String plot, int releaseYear, int weeklyPrice, String production_company,int budget) {
+	public Film(int idFilm, String title, String genre, String plot, String releaseYear, int weeklyPrice, String production_company,int budget) {
 
 		this.idFilm = idFilm;
         this.title = title;
@@ -44,7 +45,7 @@ public class Film {
 		this.budget = budget;
 	}
 	
-	public Film( String title, List<String> genre, String plot, int releaseYear, int weeklyPrice, String production_company, int budget) {
+	public Film( String title, String genre, String plot, String releaseYear, int weeklyPrice, String production_company, int budget) {
 
 		this.idFilm = 0;
         this.title = title;
@@ -62,13 +63,13 @@ public class Film {
 	public String getTitle(){
 		return this.title;
 	}
-	public List<String> getGenre(){
+	public String getGenre(){
 		return this.genre;
 	}
 	public String getPlot(){
 		return this.plot;
 	}
-	public int getReleaseYear(){
+	public String getReleaseYear(){
 		return this.release_year;
 	}
 	public int getWeeklyPrice() {
