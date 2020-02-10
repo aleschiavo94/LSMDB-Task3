@@ -341,4 +341,10 @@ public class UserEntityManager {
 	    	
 	    	return;
 	    }
+
+
+		public static void insertRental(Rental r) {
+			// TODO Auto-generated method stub
+			
+		}
 }
