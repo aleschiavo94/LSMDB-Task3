@@ -11,26 +11,28 @@ import javafx.beans.property.*;
 public class Film {
 	private final int idFilm;
 	private final String title;
-	private final String genre;
+	private final List<String> genre;
 	private final String plot;
 	private final int release_year;
 	private final int weekly_price;
-	private final String director;
+	private final String production_company;
+	private final int budget;
 	private Set<Rental> rentalList;
 	private Set<Rating> ratings;
 	
 	
 	public Film() {
 		this.idFilm=0;
-		this.director="";
-		this.genre="";
+		this.production_company="";
+		this.genre=null;
 		this.title = "";
 		this.release_year= 0;
 		this.weekly_price = 0;
 		this.plot = "";
+		this.budget=0;
 	}
 	
-	public Film(int idFilm, String title, String genre, String plot, int releaseYear, int weeklyPrice, String director) {
+	public Film(int idFilm, String title, List<String> genre, String plot, int releaseYear, int weeklyPrice, String production_company,int budget) {
 
 		this.idFilm = idFilm;
         this.title = title;
@@ -38,10 +40,11 @@ public class Film {
 		this.plot = plot;
 		this.release_year = releaseYear;
 		this.weekly_price = weeklyPrice;
-		this.director = director;
+		this.production_company = production_company;
+		this.budget = budget;
 	}
 	
-	public Film( String title, String genre, String plot, int releaseYear, int weeklyPrice, String director/*, List<Rental> rental, List<Rating> rating*/) {
+	public Film( String title, List<String> genre, String plot, int releaseYear, int weeklyPrice, String production_company, int budget) {
 
 		this.idFilm = 0;
         this.title = title;
@@ -49,7 +52,8 @@ public class Film {
 		this.plot = plot;
 		this.release_year = releaseYear;
 		this.weekly_price = weeklyPrice;
-		this.director = director;
+		this.production_company = production_company;
+		this.budget = budget;
 	}
 
 	public int getIdFilm(){
@@ -58,7 +62,7 @@ public class Film {
 	public String getTitle(){
 		return this.title;
 	}
-	public String getGenre(){
+	public List<String> getGenre(){
 		return this.genre;
 	}
 	public String getPlot(){
@@ -70,8 +74,11 @@ public class Film {
 	public int getWeeklyPrice() {
 		return this.weekly_price;
 	}
-	public String getDirector() {
-		return this.director;
+	public String getProductionCompany() {
+		return this.production_company;
+	}
+	public int getBudget() {
+		return this.budget;
 	}
 	
 	
@@ -91,7 +98,8 @@ public class Film {
 		this.plot = f.getPlot();
 		this.release_year = f.getReleaseYear();
 		this.weekly_price = f.getWeeklyPrice();
-		this.director = f.getDirector();
+		this.production_company = f.getProductionCompany();
+		this.budget = f.getBudget();
 		
 		this.ratings = new HashSet<Rating>();
 		ratings.addAll(f.getRatingList());
