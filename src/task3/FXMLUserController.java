@@ -187,13 +187,15 @@ public class FXMLUserController implements Initializable {
 				//inserting a new rental for the current user
 				LocalDate stDate = LocalDate.now();
 				LocalDate eDate = stDate.plusDays(7);
-		
-				Rental r = new Rental(current_user, f, stDate, eDate, tot);
-			
-				//UserEntityManager.insertRental(r);
-			
+				
+				for(int i=0; i<f.size(); i++) {
+					Rental r = new Rental(current_user.getUsername(), f.get(i).getTitle(), stDate, eDate, tot);
+					UserEntityManager.insertRental(r);
+				}
+				
+
 				//decreasing user's credit and updating the value
-				current_user.setCredit(current_user.getCredit() - tot);
+				//current_user.setCredit(current_user.getCredit() - tot);
 				//UserEntityManager.updateUserInfo(current_user);
 		
 				film_in_cart.clear();
@@ -216,7 +218,7 @@ public class FXMLUserController implements Initializable {
 	
         //tmp = new User(UserEntityManager.refreshUser(current_user));
         //current_user = tmp;
-        rentals.addAll(current_user.getRentals());
+        rentals.addAll(UserEntityManager.getRentals(current_user));
 		//rentals.addAll(user_man.searchRentalByUser(current_user));
 		
 	}
