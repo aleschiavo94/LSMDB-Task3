@@ -53,16 +53,24 @@ public class UserEntityManager {
 	    				
 	    				StatementResult result = matchUsernamePassword(tx, username, password);
 	    				
-	    				
 	    				while (result.hasNext()) {
 	    					Record record = result.next();
-	    				      
-	    				    int id = record.get("id").asInt();
+	    					int id, credit;
+	    					
+	    				    if(record.get("id").isNull()) {
+	    				    	id=0;
+	    				    }else {
+	    				    	id = record.get("id").asInt();
+	    				    }
 	    				    String username = record.get("username").asString();
 	    				    String password = record.get("password").asString();
 	    				    String surname = record.get("surname").asString();
 	    				    String name = record.get("name").asString();
-	    				    int credit = record.get("credit").asInt();
+	    				    if(record.get("credit").isNull()) {
+	    				    	credit=0;
+	    				    }else {
+	    				    	credit = record.get("credit").asInt();
+	    				    }
 	    			        String email = record.get("email").asString();
 	    				        
 	    			        u = new User(id, username, password, name, surname, email, credit);
@@ -153,7 +161,8 @@ public class UserEntityManager {
 	    /*
 	     * USER CONTROLLER FUNCTIONS
 	     */
-	    
+
+	    //getting all the films
 	    public static List<Film> getFilms(){
 	    	List<Film> list;
 	    	
@@ -161,15 +170,28 @@ public class UserEntityManager {
 	    		list = session.readTransaction(new TransactionWork<List<Film>>() {
 	    			@Override
 	    			public List<Film> execute(Transaction tx) {
-	    				List<Film> films;
-	    				
-	    				StatementResult result = matchFilms(tx);
-	    				
+	    				List<String> films = new ArrayList<>();
+	    				List<Film> e = new ArrayList<>();
+	    				//e = matchFilms(tx);
+	    				System.out.println(films);
+	    				/*
 	    				while(result.hasNext()) {
 	    					Record record = result.next();
 	    					
+	    					int id = record.get("id").asInt();
+	    					String title = record.get("title").asString();
+	    					String genre = record.get("genre").asList().toString();
+	    					System.out.println(genre);
+	    					List<String> gen = null;
+	    					String plot = record.get("overview").asString();
+	    					int year = record.get("release_date").asLocalDate().getYear();
+	    					int price = record.get("weeklyPrice").asInt();
+	    					String prod = record.get("production_company").asString();
+	    					int budget = record.get("budget").asInt();
 	    					
-	    				}
+	    					films.add(new Film(id, title, gen, plot, year, price, prod, budget));
+	    				} */
+	    				return e;
 	    			}
 	    		});
 	    	}
@@ -178,8 +200,192 @@ public class UserEntityManager {
 	    }
 	    
 	    
-	    private static StatementResult matchFilms(Transaction tx){
-	    	StatementResult result=tx.run("MATCH(ff:Movies) RETURN ff;");
+	    private static List<Film> matchFilms(Transaction tx){
+	    	List<Film> movies = new ArrayList<>();
+	    	StatementResult result=tx.run("MATCH(ff:Movies) RETURN ff.id AS id, ff.title AS title,"
+	    			+ "ff.genres AS genre, ff.overview AS plot, ff.release_date AS year,"
+	    			+ "ff.weeklyPrice AS weeklyPrice, ff.production_company AS production_company,"
+	    			+ "ff.budget AS budget;");
+
+	    	while(result.hasNext()) {
+	    		System.out.println(result.next().get("genre").get("name"));
+	    		/*
+	    		int id = result.next().get("id").asInt();
+				String title = result.next().get("title").asString();
+				String genre = result.next().get("genre").asList().toString();
+				
+				List<String> gen = null;
+				String plot = result.next().get("plot").asString();
+				int year = result.next().get("release_date").asLocalDate().getYear();
+				int price = result.next().get("weeklyPrice").asInt();
+				String prod = result.next().get("production_company").asString();
+				int budget = result.next().get("budget").asInt();
+				
+	    		movies.add(new Film(id, title, gen, plot, year, price, prod, budget));
+	    		*/
+	    	}
+	    	return movies;
+	    }
+	    
+	    
+	    
+	    /*
+	     * ADMIN CONTROLLER FUNCTIONS
+	     */
+	    //getting all the users
+	    public static List<User> getUsers() {
+	    	List<User> u;
+	    	try(Session session = driver.session()){
+	    		u = session.readTransaction(new TransactionWork<List<User>>() {
+	    			@Override
+	    			public List<User> execute(Transaction tx) {
+	    				List<User> list = new ArrayList<>();
+	    				
+	    				StatementResult result = matchUsers(tx);
+	    				
+	    				
+	    				while (result.hasNext()) {
+	    					User user;
+	    					Record record = result.next();
+	   
+	    				    int id = record.get("id").asInt();
+	    				    String username = record.get("username").asString();
+	    				    String password = record.get("password").asString();
+	    				    String surname = record.get("surname").asString();
+	    				    String name = record.get("name").asString();
+	    				    int credit = record.get("credit").asInt();
+	    			        String email = record.get("email").asString();
+	    				        
+	    			        user = new User(id, username, password, name, surname, email, credit);
+	    			        list.add(user);
+	    				}
+	    				return list;
+	    			}
+	    		});
+	    	}
+	    	return u;
+	    }
+	    
+	    private static StatementResult matchUsers(Transaction tx) {
+	    	StatementResult result = tx.run("MATCH (ee:Users) WHERE ee.username <> \"admin\" "
+	    			+ "RETURN ee.id AS id, ee.username AS username, ee.password AS password,"
+	    			+ "ee.surname AS surname, ee.name AS name, ee.credit AS credit, ee.email AS email;");
+	    	
 	    	return result;
+	    }
+	    
+	    /*
+	    //getting all the rented films of a user
+	    public static List<Film> getUsersFilms(User user){
+	    	List<Film> list;
+	    	
+	    	try(Session session = driver.session()){
+	    		list = session.readTransaction(new TransactionWork<List<Film>>() {
+	    			@Override
+	    			public List<Film> execute(Transaction tx) {
+	    				List<String> films = new ArrayList<>();
+	    				List<Film> e = new ArrayList<>();
+	    				//e = matchUserFilms(tx, user);
+	    				System.out.println(films);
+	    				
+	    				while(result.hasNext()) {
+	    					Record record = result.next();
+	    					
+	    					int id = record.get("id").asInt();
+	    					String title = record.get("title").asString();
+	    					String genre = record.get("genre").asList().toString();
+	    					System.out.println(genre);
+	    					List<String> gen = null;
+	    					String plot = record.get("overview").asString();
+	    					int year = record.get("release_date").asLocalDate().getYear();
+	    					int price = record.get("weeklyPrice").asInt();
+	    					String prod = record.get("production_company").asString();
+	    					int budget = record.get("budget").asInt();
+	    					
+	    					films.add(new Film(id, title, gen, plot, year, price, prod, budget));
+	    				} 
+	    				return e;
+	    			}
+	    		});
+	    	}
+	    	
+	    	return list;
+	    } 
+	    
+	    private static List<Film> matchUserFilms(Transaction tx, User u){
+	    	List<Film> movies = new ArrayList<>();
+	    	Map<String, Object> params = new HashMap<>();
+    		params.put("username", u.getUsername());
+    		
+	    	StatementResult result=tx.run("MATCH (ee:Users)-[:RENTS]-(ff:Movies)\r\n" + 
+	    			"WHERE ee.username = $username RETURN  ff.id AS id, ff.title AS title,"
+	    			+ "ff.genres AS genre, ff.overview AS plot, ff.release_date AS year,"
+	    			+ "ff.weeklyPrice AS weeklyPrice, ff.production_company AS production_company,"
+	    			+ "ff.budget AS budget;", params);
+
+	    	while(result.hasNext()) {
+	    		System.out.println(result.next().get("genre").get("name"));
+	    		
+	    		int id = result.next().get("id").asInt();
+				String title = result.next().get("title").asString();
+				String genre = result.next().get("genre").asList().toString();
+				
+				List<String> gen = null;
+				String plot = result.next().get("plot").asString();
+				int year = result.next().get("release_date").asLocalDate().getYear();
+				int price = result.next().get("weeklyPrice").asInt();
+				String prod = result.next().get("production_company").asString();
+				int budget = result.next().get("budget").asInt();
+				
+	    		movies.add(new Film(id, title, gen, plot, year, price, prod, budget));
+	    		
+	    	}
+	    	return movies;
+	    }
+	    */
+	    
+	    //deleting the user and all the rentals
+	    public static void removeUser(User user) {
+	    	
+	    	try(Session session = driver.session()){
+	    		session.writeTransaction(new TransactionWork<Void>() {
+	    			@Override
+	    			public Void execute(Transaction tx) {
+	    				deleteUserMovies(tx, user);
+	    				deleteUserRatings(tx, user);
+	    				deleteUser(tx, user);
+	    				return null;
+	    			}
+	    		});
+	    	}
+	    	
+	    	return;
+	    } 
+	    
+	    private static void deleteUserMovies(Transaction tx, User u) {
+	    	Map<String, Object> params = new HashMap<>();
+    		params.put("username", u.getUsername());
+    		
+	    	tx.run("MATCH (n { username: $username})-[r:RENTS]-() DELETE r", params);
+	    	
+	    	return;
+	    }
+	    
+	    private static void deleteUserRatings(Transaction tx, User u) {
+	    	Map<String, Object> params = new HashMap<>();
+    		params.put("username", u.getUsername());
+    		
+	    	tx.run("MATCH (n { username: $username'})-[r:RATES]-() delete r", params);
+	    	
+	    	return;
+	    }
+	    
+	    private static void deleteUser(Transaction tx, User u) {
+	    	Map<String, Object> params = new HashMap<>();
+    		params.put("username", u.getUsername());
+    		
+	    	tx.run("MATCH (n { username: $username'}) delete n", params);
+	    	
+	    	return;
 	    }
 }

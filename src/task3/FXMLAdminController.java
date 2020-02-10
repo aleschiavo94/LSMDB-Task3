@@ -223,7 +223,7 @@ public class FXMLAdminController implements Initializable{
 		this.search_start_period.getEditor().clear();
 		this.search_end_period.getEditor().clear();
 		
-		this.rentals.addAll(UserEntityManager.getRentals());
+		//this.rentals.addAll(UserEntityManager.getRentals());
 		this.rental_table.setItems(rentals);
 		this.count_value_label.setText(Integer.toString(rentals.size()));
 		int sum = 0;
@@ -270,8 +270,9 @@ public class FXMLAdminController implements Initializable{
 			windowAlert.showAndWait();
 		}else {
 			//deleting the account and its rentals and ratings
-			List<Film> films_user = UserEntityManager.getUsersFilms(selected_user);
-			UserEntityManager.removeUser(selected_user, films_user);
+			//List<Film> films_user = UserEntityManager.getUsersFilms(selected_user);
+			//UserEntityManager.removeUser(selected_user, films_user);
+			UserEntityManager.removeUser(selected_user);
 			
 			//updating users list
 			user_in_db.clear();
