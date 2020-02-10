@@ -208,6 +208,19 @@ public class UserEntityManager {
 	    	return result;
 	    }
 	    
+	    private static void createRent(Transaction tx, String username, String title) {
+	    	Map<String, Object> params = new HashMap<>();
+    		params.put("username", username);
+    		params.put("title", title);
+    		params.put("date", Local);
+    		
+	    	StatementResult result = tx.run("MATCH (ee:Users),(ff:Movies) "
+	    			+ "WHERE ee.username=$username and ff.title=$title"
+	    			+ "CREATE (ee)-[r:RENTS{date:$date}]->(ff) RETURN r");
+	    	
+	    	return;
+	    }
+	    
 	    
 	    
 	    /*
@@ -341,4 +354,5 @@ public class UserEntityManager {
 	    	
 	    	return;
 	    }
+	    
 }
