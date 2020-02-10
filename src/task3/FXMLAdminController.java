@@ -355,7 +355,7 @@ public class FXMLAdminController implements Initializable{
 		if(username_searched.length() > 0) {
 			if(start_period == null && end_period == null) {
 				for(Rental r : this.rentals) {
-					if(r.getUser().getUsername().equals(username_searched)) {
+					if(r.getUser().equals(username_searched)) {
 						list.add(r);
 						sum += r.getTotalPrice();
 						count +=1;
@@ -364,7 +364,7 @@ public class FXMLAdminController implements Initializable{
 				}
 			}else {
 				for(Rental r : this.rentals) {
-					if(r.getUser().getUsername().equals(username_searched) && r.getStartDate().isAfter(start_period) && r.getEndDate().isBefore(end_period)) {
+					if(r.getUser().equals(username_searched) && r.getStartDate().isAfter(start_period) && r.getEndDate().isBefore(end_period)) {
 						list.add(r);
 						sum += r.getTotalPrice();
 						count +=1;
@@ -397,15 +397,15 @@ public class FXMLAdminController implements Initializable{
 	public ObservableList<String> getTop3Movies(ObservableList<Rental> list){
 		ObservableList<Film> lista_film = FXCollections.observableArrayList();
 		ObservableList<String> lista_finale = FXCollections.observableArrayList();
-		
+		/*
 		//inserting all the films in one list
 		for(Rental r: list) {
-			Set<Film> set = r.getFilmList();
+			String set = r.getTitle();
 			for(Film film_set: set) {
 				lista_film.add(film_set);
 			}
 			
-		}
+		} */
 		
 		//counting the occurrences
 		ArrayList<String> arr = new ArrayList();
