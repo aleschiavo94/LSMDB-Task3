@@ -56,8 +56,8 @@ public class FXMLUserController implements Initializable {
 	
 	//objects for visualizing the films of the current user's rentals
 	//@FXML private TableView<Film> rented_film_table;
-	@FXML private TableColumn<Film, String> rented_title_column;
-		  private ObservableList<Film> rented_film;
+	//@FXML private TableColumn<Film, String> rented_title_column;
+		//  private ObservableList<Film> rented_film;
 		
 		
 	//textfield for live search of a film by title
@@ -93,7 +93,7 @@ public class FXMLUserController implements Initializable {
 		film_in_cart = FXCollections.observableArrayList();
 		cart_table.setItems(film_in_cart);
 		
-		//initialising the rent table
+		//initializing the rent table
 		rental_startDate_column.setCellValueFactory(new PropertyValueFactory<Rental, LocalDate>("startDate"));
 		rental_endDate_column.setCellValueFactory(new PropertyValueFactory<Rental, LocalDate>("endDate"));
 		rental_title_column.setCellValueFactory(new PropertyValueFactory<Rental, String>("title"));
@@ -217,7 +217,7 @@ public class FXMLUserController implements Initializable {
         //tmp = new User(UserEntityManager.refreshUser(current_user));
         //current_user = tmp;
         rentals.addAll(UserEntityManager.getRentals(current_user));
-		//rentals.addAll(user_man.searchRentalByUser(current_user));
+		
 		
 	}
 	
@@ -227,7 +227,7 @@ public class FXMLUserController implements Initializable {
 //		//cleaning the table and getting the selected rental
 //		rented_film.clear();
 //		Rental r = rental_table.getSelectionModel().getSelectedItem();
-//		
+//	System.out.println(r.getFilmList());
 //		if(r != null) {//if it isn't an empty row
 //			//filling the table with all the films for the selected rental
 //			Set<Film> setFilm;

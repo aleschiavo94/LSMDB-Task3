@@ -17,8 +17,8 @@ public class Rental {
     private final LocalDate endDate;
     private final int totalPrice;
     //private User user;
-    private String username;
-    private String listFilm;
+    private final String username;
+    private final String title;
     
     public Rental( /*int idN, User u,*/String user, String list, LocalDate stDate, LocalDate eDate, int totp){
     	
@@ -26,7 +26,7 @@ public class Rental {
         //this.user = new User(u);
         //this.listFilm = new ArrayList<>();
     	this.username=user;
-        this.listFilm= list;
+        this.title= list;
        
         this.startDate = (stDate);
         this.endDate = (eDate);
@@ -34,13 +34,14 @@ public class Rental {
         
     }
     
+    /*
     public Rental() {
     	//this.idRental = 0;
     	this.startDate = LocalDate.now();
     	this.endDate = LocalDate.now();
     	this.totalPrice = 0;
     	
-    }
+    }*/
     
     /*
     public Rental(User u, String list, LocalDate stDate, LocalDate eDate, int totp) {
@@ -61,7 +62,7 @@ public class Rental {
         this.username = n.getUser();
        // this.listFilm = new ArrayList<>();
         
-        this.listFilm=n.getFilmList();
+        this.title=n.getTitle();
         this.startDate = (n.getStartDate());
         this.endDate = (n.getEndDate());
         this.totalPrice = (n.getTotalPrice());
@@ -74,8 +75,8 @@ public class Rental {
     } */
     
     
-    public String getFilmList(){
-        return this.listFilm;
+    public String getTitle(){
+        return this.title;
     }
     public LocalDate getStartDate(){
         return this.startDate;

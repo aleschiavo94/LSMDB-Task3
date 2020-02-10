@@ -216,7 +216,7 @@ public class UserEntityManager {
 	    			@Override
 	    			public Void execute(Transaction tx) {
 	    				String date = rent.getStartDate().toString();
-	    				createRent(tx, rent.getUser(), rent.getFilmList(), date);
+	    				createRent(tx, rent.getUser(), rent.getFilm(), date);
 	    				return null;
 	    			}
 	    		});
