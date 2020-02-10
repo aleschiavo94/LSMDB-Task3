@@ -19,8 +19,6 @@
   <tabs>
       <Tab text="Suggested movies">
         <content>
-          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-               <children>
                   <Pane prefHeight="550.0" prefWidth="591.0">
                      <children>
                         <TableView fx:id="film_follower" layoutX="14.0" layoutY="49.0" onMouseClicked="#showDetails" prefHeight="214.0" prefWidth="260.0">
@@ -65,7 +63,6 @@
                         </Text>
                      </children>
                   </Pane>
-               </children></AnchorPane>
         </content>
       </Tab>
     <Tab text="Search a movie">
@@ -110,7 +107,7 @@
          <content>
             <Pane prefHeight="398.0" prefWidth="564.0" style="-fx-background-image: url(&quot;sfondo_rent.jpeg&quot;); -fx-background-size: contain;">
                <children>
-                  <TableView fx:id="rental_table" layoutX="116.0" layoutY="151.0" prefHeight="270.0" prefWidth="360.0">
+                  <TableView fx:id="rental_table" layoutX="116.0" layoutY="151.0" onMouseClicked="#getSelectedRent" prefHeight="270.0" prefWidth="360.0">
                     <columns>
                         <TableColumn fx:id="rental_title_column" prefWidth="120.0" text="Title" />
                       	<TableColumn fx:id="rental_startDate_column" minWidth="0.0" prefWidth="120.0" text="Start Date" />
@@ -122,8 +119,6 @@
          </content></Tab>
       <Tab text="Following">
         <content>
-          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-               <children>
                   <Pane prefHeight="550.0" prefWidth="590.0">
                      <children>
                         <TableView fx:id="all_user" layoutX="84.0" layoutY="50.0" onMouseClicked="#showDetails" prefHeight="490.0" prefWidth="195.0">
@@ -152,8 +147,7 @@
                            </font>
                         </Button>
                      </children>
-                  </Pane>
-               </children></AnchorPane>
+                  </Pane
         </content>
       </Tab>
       <Tab closable="false" onSelectionChanged="#initUserInfo" text="Profile">

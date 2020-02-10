@@ -34,7 +34,7 @@ public class UserEntityManager {
 	    }
 
 
-	    public void close() throws Exception{
+	    public static void close(){
 	        driver.close();
 	    }
 	    
