@@ -75,7 +75,6 @@ public class Rental {
     
     
     public String getFilmList(){
-    	
         return this.listFilm;
     }
     public LocalDate getStartDate(){

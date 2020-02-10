@@ -208,15 +208,32 @@ public class UserEntityManager {
 	    	return result;
 	    }
 	    
-	    private static void createRent(Transaction tx, String username, String title) {
+	    //inserting a new rental for the user
+	    public static void insertRental(Rental rent) {
+	    	
+	    	try(Session session = driver.session()){
+	    		session.writeTransaction(new TransactionWork<Void>() {
+	    			@Override
+	    			public Void execute(Transaction tx) {
+	    				String date = rent.getStartDate().toString();
+	    				createRent(tx, rent.getUser(), rent.getFilmList(), date);
+	    				return null;
+	    			}
+	    		});
+	    	}
+	    	
+	    	return;
+	    } 
+	    
+	    private static void createRent(Transaction tx, String username, String title, String date) {
 	    	Map<String, Object> params = new HashMap<>();
     		params.put("username", username);
     		params.put("title", title);
-    		params.put("date", Local);
+    		params.put("date", date);
     		
-	    	StatementResult result = tx.run("MATCH (ee:Users),(ff:Movies) "
-	    			+ "WHERE ee.username=$username and ff.title=$title"
-	    			+ "CREATE (ee)-[r:RENTS{date:$date}]->(ff) RETURN r");
+	    	tx.run("MATCH (ee:Users),(ff:Movies) "
+	    			+ " WHERE ee.username=$username and ff.title=$title"
+	    			+ " CREATE(ee)-[r:RENTS{date:$date}]->(ff) RETURN r", params);
 	    	
 	    	return;
 	    }
@@ -354,5 +371,5 @@ public class UserEntityManager {
 	    	
 	    	return;
 	    }
-	    
+
 }
