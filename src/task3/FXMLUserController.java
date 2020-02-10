@@ -72,6 +72,15 @@ public class FXMLUserController implements Initializable {
 	@FXML private PasswordField infouser_newpassword_field;
 	@FXML private PasswordField infouser_currentpassword_field;
 	@FXML private TextField infouser_deposit_field;
+	
+	//objects for visualizing follower
+	@FXML private TableView<User> followed_table;
+	@FXML private TableColumn<User, String> username_followed_column;
+		private ObservableList<User> followed;
+		
+	@FXML private TableView<User> all_user_table;
+	@FXML private TableColumn<User, String> all_user_column;
+		private ObservableList<User> all_user;
 		
 	
 	
@@ -104,6 +113,15 @@ public class FXMLUserController implements Initializable {
 		//rented_title_column.setCellValueFactory(new PropertyValueFactory<Film, String>("title"));
 		//rented_film = FXCollections.observableArrayList();
 		//rented_film_table.setItems(rented_film);
+		
+		//initializing follower table
+		username_followed_column.setCellValueFactory(new PropertyValueFactory<User, String>("username"));
+		followed = FXCollections.observableArrayList();
+		followed_table.setItems(followed);
+		
+		all_user_column.setCellValueFactory(new PropertyValueFactory<User, String>("username"));
+		all_user = FXCollections.observableArrayList();
+		all_user_table.setItems(all_user);
     }  
 	
 	
@@ -217,8 +235,19 @@ public class FXMLUserController implements Initializable {
         //tmp = new User(UserEntityManager.refreshUser(current_user));
         //current_user = tmp;
         rentals.addAll(UserEntityManager.getRentals(current_user));
-		
-		
+	}
+	
+	//loading current user's followed
+	public void initFollowed() {
+		followed.clear();
+		all_user.clear();
+		User tmp;
+	
+        //tmp = new User(UserEntityManager.refreshUser(current_user));
+        //current_user = tmp;
+        followed.addAll(UserEntityManager.getFollowed(current_user));
+        all_user.addAll(UserEntityManager.getUsersToFollow(current_user));
+        
 	}
 	
 	

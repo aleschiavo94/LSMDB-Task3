@@ -26,7 +26,7 @@ public class UserEntityManager {
 
 	    // Driver objects are thread-safe and are typically made available application-wide.
 	    private final static Driver driver;
-	    private static UserEntityManager userEntityManager;
+	    //private static UserEntityManager userEntityManager;
 	    
 	    static {	
 	    	//Constructing the Driver instance on startup
@@ -238,6 +238,98 @@ public class UserEntityManager {
 	    	return;
 	    }
 	    
+	  //getting all the users
+	    public static List<User> getFollowed(User user) {
+	    	List<User> list = new ArrayList<>();
+	    	List<Record> record;
+	    	try(Session session = driver.session()){
+	    		
+	    		record = session.readTransaction(new TransactionWork<List<Record>>() {
+	    			@Override
+	    			public List<Record> execute(Transaction tx) {
+	    				List<Record> res = matchFollowed(tx, user);
+	    				
+	    				return res;
+	    			}
+	    		});
+	    		
+	    		for(Record rec: record) {
+    				User new_user;
+    				
+    				int id = rec.get("id").asInt();
+    				String username = rec.get("username").asString();
+    				String password = rec.get("password").asString();
+    				String surname = rec.get("surname").asString();
+    				String name = rec.get("name").asString();
+    				int credit = rec.get("credit").asInt();
+    			    String email = rec.get("email").asString();
+    				        
+    			    new_user = new User(id, username, password, name, surname, email, credit);
+    			    list.add(new_user);
+    				
+	    		}
+	    	}
+	    	return list;
+	    }
+	    
+	    
+	    private static List<Record> matchFollowed(Transaction tx, User u) {
+	    	Map<String, Object> params = new HashMap<>();
+    		params.put("username", u.getUsername());
+    		
+	    	List<Record> result = tx.run("MATCH (ee:Users)-[r:FOLLOWS]-(friends) "
+	    			+ "WHERE ee.username =$username return friends.id AS id, "
+	    			+ "friends.username AS username, friends.password AS password,"
+	    			+ "friends.surname AS surname, friends.name AS name,"
+	    			+ "friends.credit AS credit, friends.email AS email", params).list();
+	    	
+	    	return result;
+	    }
+	    
+	    //getting all the users
+	    public static List<User> getUsersToFollow(User user) {
+	    	List<User> list = new ArrayList<>();
+	    	List<Record> record;
+	    	try(Session session = driver.session()){
+	    		
+	    		record = session.readTransaction(new TransactionWork<List<Record>>() {
+	    			@Override
+	    			public List<Record> execute(Transaction tx) {
+	    				List<Record> res = matchUsersToFollow(tx, user);
+	    				
+	    				return res;
+	    			}
+	    		});
+	    		
+	    		for(Record rec: record) {
+    				User new_user;
+    				
+    				int id = rec.get("id").asInt();
+    				String username = rec.get("username").asString();
+    				String password = rec.get("password").asString();
+    				String surname = rec.get("surname").asString();
+    				String name = rec.get("name").asString();
+    				int credit = rec.get("credit").asInt();
+    			    String email = rec.get("email").asString();
+    				        
+    			    new_user = new User(id, username, password, name, surname, email, credit);
+    			    list.add(new_user);
+    				
+	    		}
+	    	}
+	    	return list;
+	    }
+	    
+	    private static List<Record> matchUsersToFollow(Transaction tx, User u) {
+	    	Map<String, Object> params = new HashMap<>();
+    		params.put("username", u.getUsername());
+    		
+    		List<Record> result = tx.run("MATCH (ee:Users) WHERE ee.username <> $username "
+	    			+ "RETURN ee.id AS id, ee.username AS username, ee.password AS password,"
+	    			+ "ee.surname AS surname, ee.name AS name, ee.credit AS credit, ee.email AS email;", params).list();
+	    	
+	    	return result;
+	    }
 	    
 	    
 	    /*

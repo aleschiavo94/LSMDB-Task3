@@ -120,20 +120,20 @@
                </children>
             </Pane>
          </content></Tab>
-      <Tab text="Following">
+      <Tab onSelectionChanged="#initFollowed" text="Following">
         <content>
           <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                <children>
                   <Pane prefHeight="550.0" prefWidth="590.0">
                      <children>
-                        <TableView fx:id="all_user" layoutX="84.0" layoutY="50.0" onMouseClicked="#showDetails" prefHeight="490.0" prefWidth="195.0">
+                        <TableView fx:id="all_user_table" layoutX="84.0" layoutY="50.0" onMouseClicked="#showDetails" prefHeight="490.0" prefWidth="195.0">
                            <columns>
-                              <TableColumn fx:id="title_column2" editable="false" prefWidth="195.0" text="Username" />
+                              <TableColumn fx:id="all_user_column" editable="false" prefWidth="195.0" text="Username" />
                            </columns>
                         </TableView>
-                        <TableView fx:id="follow_user" layoutX="309.0" layoutY="50.0" onMouseClicked="#showDetails" prefHeight="410.0" prefWidth="195.0">
+                        <TableView fx:id="followed_table" layoutX="309.0" layoutY="50.0" onMouseClicked="#showDetails" prefHeight="410.0" prefWidth="195.0">
                            <columns>
-                              <TableColumn fx:id="title_column21" editable="false" prefWidth="195.0" text="Username" />
+                              <TableColumn fx:id="username_followed_column" editable="false" prefWidth="195.0" text="Username" />
                            </columns>
                         </TableView>
                         <Text layoutX="148.0" layoutY="31.0" strokeType="OUTSIDE" strokeWidth="0.0" text="All users">
