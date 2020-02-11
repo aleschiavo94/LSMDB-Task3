@@ -25,10 +25,10 @@ import org.neo4j.driver.v1.util.Pair;
 public class UserEntityManager {
 
 	    // Driver objects are thread-safe and are typically made available application-wide.
-	    private final static Driver driver;
+	    private static Driver driver;
 	    //private static UserEntityManager userEntityManager;
 	    
-	    static {	
+	    public static void start(){	
 	    	//Constructing the Driver instance on startup
 	    	driver = GraphDatabase.driver( "bolt://localhost:7687", AuthTokens.basic( "neo4j", "fede95" ) );
 	    }
@@ -464,4 +464,91 @@ public class UserEntityManager {
 	    	return;
 	    }
 
+	    
+	    public static List<Film> getTopRentedFilms(){
+	    	List<Record> list;
+	    	List<Film> films = new ArrayList<>();
+	    	
+	    	try(Session session = driver.session()){
+	    		list = session.readTransaction(new TransactionWork<List<Record>>() {
+	    			@Override
+	    			public List<Record> execute(Transaction tx) {	
+	    				return topRentedFilms(tx);
+	    			}
+	    		});
+	    		
+	    		for(Record res: list) {
+	    	  		int id = res.get("id").asInt();
+					String title = res.get("title").asString();
+					String genre = res.get("genre").asString();
+					String plot = res.get("plot").asString();
+					String year = res.get("year").asString();
+					int price = res.get("weeklyPrice").asInt();
+					String prod = res.get("production_company").asString();
+					int budget = res.get("budget").asInt();
+					
+		    		films.add(new Film(id, title, genre, plot, year, price, prod, budget));
+		    		
+		    	} 
+			}
+
+	    	return films;
+	    } 
+	    
+	    private static List<Record> topRentedFilms(Transaction tx){
+    		
+    		List<Record> result=tx.run("MATCH (ff:Movies)-[r:RENTS]-()" + 
+    				"return ff.id AS id, ff.title AS title," + 
+    				"ff.genres AS genre, ff.overview AS plot, ff.release_date AS year," + 
+    				"ff.weeklyPrice AS weeklyPrice, ff.production_company AS production_company," + 
+    				"ff.budget AS budget, count(r) as conta " + 
+    				"ORDER BY conta " + 
+    				"DESC LIMIT 10").list();
+
+	    	return result;
+	    }
+	    
+	    
+	    public static List<Film> getTopRatedFilms(){
+	    	List<Record> list;
+	    	List<Film> films = new ArrayList<>();
+	    	
+	    	try(Session session = driver.session()){
+	    		list = session.readTransaction(new TransactionWork<List<Record>>() {
+	    			@Override
+	    			public List<Record> execute(Transaction tx) {	
+	    				return topRatedFilms(tx);
+	    			}
+	    		});
+	    		
+	    		for(Record res: list) {
+	    	  		int id = res.get("id").asInt();
+					String title = res.get("title").asString();
+					String genre = res.get("genre").asString();
+					String plot = res.get("plot").asString();
+					String year = res.get("year").asString();
+					int price = res.get("weeklyPrice").asInt();
+					String prod = res.get("production_company").asString();
+					int budget = res.get("budget").asInt();
+					
+		    		films.add(new Film(id, title, genre, plot, year, price, prod, budget));
+		    		
+		    	} 
+			}
+
+	    	return films;
+	    } 
+	    
+	    private static List<Record> topRatedFilms(Transaction tx){
+    		
+    		List<Record> result=tx.run("MATCH (ff:Movies)-[r:RATES]-()" + 
+    				"return ff.id AS id, ff.title AS title," + 
+    				"ff.genres AS genre, ff.overview AS plot, ff.release_date AS year," + 
+    				"ff.weeklyPrice AS weeklyPrice, ff.production_company AS production_company," + 
+    				"ff.budget AS budget, sum(r.vote) as rate " + 
+    				"ORDER BY rate " + 
+    				"DESC LIMIT 10").list();
+
+	    	return result;
+	    }
 }

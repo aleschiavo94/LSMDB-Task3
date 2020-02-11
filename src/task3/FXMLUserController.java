@@ -82,7 +82,13 @@ public class FXMLUserController implements Initializable {
 	@FXML private TableColumn<User, String> all_user_column;
 		private ObservableList<User> all_user;
 		
-	
+	@FXML private TableView<Film> most_rent_film;
+	@FXML private TableColumn<Film, String> most_rent_column;
+		private ObservableList<Film> top_rent_film;
+		
+		@FXML private TableView<Film> top_rate_film;
+		@FXML private TableColumn<Film, String> top_rate_column;
+			private ObservableList<Film> top_rate_list;
 	
 	public void initialize(URL url, ResourceBundle rb) {
        //ininizializing of the table 
@@ -122,6 +128,16 @@ public class FXMLUserController implements Initializable {
 		all_user_column.setCellValueFactory(new PropertyValueFactory<User, String>("username"));
 		all_user = FXCollections.observableArrayList();
 		all_user_table.setItems(all_user);
+		
+		most_rent_column.setCellValueFactory(new PropertyValueFactory<Film, String>("title"));
+		top_rent_film = FXCollections.observableArrayList();
+		top_rent_film.addAll(UserEntityManager.getTopRentedFilms());
+		most_rent_film.setItems(top_rent_film);
+		
+		top_rate_column.setCellValueFactory(new PropertyValueFactory<Film, String>("title"));
+		top_rate_list = FXCollections.observableArrayList();
+		top_rate_list.addAll(UserEntityManager.getTopRatedFilms());
+		top_rate_film.setItems(top_rate_list);
     }  
 	
 	

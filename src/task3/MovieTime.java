@@ -32,6 +32,7 @@ public class MovieTime extends Application {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
+    	UserEntityManager.start();
     	launch(args);
     	
     	UserEntityManager.close();

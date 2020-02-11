@@ -42,7 +42,7 @@
                         </TableView>
                         <TableView fx:id="top_rate_film" layoutX="299.0" layoutY="135.0" onMouseClicked="#showDetails" prefHeight="214.0" prefWidth="130.0">
                            <columns>
-                              <TableColumn fx:id="title_column111" editable="false" prefWidth="130.0" text="Title" />
+                              <TableColumn fx:id="top_rate_column" editable="false" prefWidth="130.0" text="Title" />
                            </columns>
                         </TableView>
                         <Text fill="WHITE" layoutX="307.0" layoutY="116.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Top rated movies">
@@ -52,7 +52,7 @@
                         </Text>
                         <TableView fx:id="most_rent_film" layoutX="442.0" layoutY="135.0" onMouseClicked="#showDetails" prefHeight="214.0" prefWidth="130.0">
                            <columns>
-                              <TableColumn fx:id="title_column1111" editable="false" prefWidth="130.0" text="Title" />
+                              <TableColumn fx:id="most_rent_column" editable="false" prefWidth="130.0" text="Title" />
                            </columns>
                         </TableView>
                         <Text fill="WHITE" layoutX="445.0" layoutY="116.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Top rented movies">
