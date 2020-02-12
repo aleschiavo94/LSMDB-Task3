@@ -186,10 +186,17 @@ public class UserEntityManager {
 	    					String plot = rec.get("plot").asString();
 	    					String year = rec.get("year").asString();
 	    					int price = rec.get("weeklyPrice").asInt();
-	    					String prod = rec.get("production_company").asString();
+	    					String production_companies = rec.get("production_companies").asString();
 	    					int budget = rec.get("budget").asInt();
+	    					int revenue = rec.get("revenue").asInt();
+	    					String production_country = rec.get("production_countries").asString();
+	    					String language = rec.get("original_language").asString();
+	    					String runtime = ""; //rec.get("duration").asInt();
+	    					int vote_count = rec.get("vote_count").asInt();
 	    					double vote_avg = Double.parseDouble(rec.get("vote_avg").asString());
-	    		    		films.add(new Film(id, title, genre, plot, year, price, prod, budget, vote_avg));
+	    					
+	    		    		films.add(new Film(id, title, genre, plot, year, price, production_companies, 
+	    		    				budget, revenue, production_country, language, runtime, vote_count, vote_avg));
 	    		    		
 	    		    	}
 	    				return films;
@@ -200,12 +207,74 @@ public class UserEntityManager {
 	    	return list;
 	    }
 	    
+	    public static int getVote(Film f) {
+	    	List<Record> record;
+
+			int vote = 0;
+			int i = 0;
+	    	try(Session session = driver.session()){
+	    		
+	    		record = session.readTransaction(new TransactionWork<List<Record>>() {
+	    			@Override
+	    			public List<Record> execute(Transaction tx) {
+	    				List<Record> res = getAverageVote(tx, f);
+	    				
+						return res;
+	    			}
+	    		});
+	    		for(Record rec: record) {
+	    			vote += rec.get("vote").asInt();
+	    			i++;
+	    		}
+	    	}
+	    	if(i == 0)
+	    		return 0;
+	    	else {
+		    	double avg = vote/i;
+		    	return (int) Math.round(avg);
+	    	}
+	    }
+	    
+	    public static int getCount(Film f) {
+	    	List<Record> record;
+
+			int vote = 0;
+			int i = 0;
+	    	try(Session session = driver.session()){
+	    		
+	    		record = session.readTransaction(new TransactionWork<List<Record>>() {
+	    			@Override
+	    			public List<Record> execute(Transaction tx) {
+	    				List<Record> res = getAverageVote(tx, f);
+	    				
+						return res;
+	    			}
+	    		});
+	    		for(Record rec: record) {
+	    			i++;
+	    		}
+	    	}
+	    	return i;
+	    }
+	    
+	    private static List<Record> getAverageVote(Transaction tx, Film f) {
+	    	Map<String, Object> params = new HashMap<>();
+	    	params.put("title", f.getTitle());
+	    	
+	    	List<Record> result = tx.run("MATCH (u:Users)-[r:RATES]-(m:Movies) "
+	    			+ "WHERE m.title=$title RETURN r.vote as vote", params).list();
+	    	
+	    	return result;
+	    }
+	    
 	    
 	    private static StatementResult matchFilms(Transaction tx){
 	    	StatementResult result=tx.run("MATCH(ff:Movies) RETURN ff.id AS id, ff.title AS title,"
 	    			+ "ff.genres AS genre, ff.overview AS plot, ff.release_date AS year,"
-	    			+ "ff.weeklyPrice AS weeklyPrice, ff.production_company AS production_company,"
-	    			+ "ff.budget AS budget, ff.vote_average as vote_avg");
+	    			+ "ff.weeklyPrice AS weeklyPrice, ff.production_companies AS production_companies,"
+	    			+ "ff.budget AS budget, ff.revenue AS revenue, ff.production_countries AS production_countries,"
+	    			+ "ff.original_language AS language, ff.runtime AS duration, ff.vote_count AS vote_count,"
+	    			+ "ff.vote_average as vote_avg");
 
 	    	
 	    	return result;
@@ -275,7 +344,6 @@ public class UserEntityManager {
 	    	return list;
 	    }
 	    
-	    
 	    private static List<Record> matchFollowed(Transaction tx, User u) {
 	    	Map<String, Object> params = new HashMap<>();
     		params.put("username", u.getUsername());
@@ -332,6 +400,32 @@ public class UserEntityManager {
 	    			+ "ee.surname AS surname, ee.name AS name, ee.credit AS credit, ee.email AS email;", params).list();
 	    	
 	    	return result;
+	    }
+	    
+	    public static void followUser(User current_user, User followed) {
+	    	try(Session session = driver.session()){
+	    		session.writeTransaction(new TransactionWork<Void>() {
+	    			@Override
+	    			public Void execute(Transaction tx) {
+	    				createNewFollows(tx, current_user, followed);
+	    				return null;
+	    			}
+	    		});
+	    	}
+	    	
+	    	return;
+	    }
+	    
+	    private static void createNewFollows(Transaction tx, User u1, User u2) {
+	    	Map<String, Object> params = new HashMap<>();
+    		params.put("username_u1", u1.getUsername());
+    		params.put("username_u2", u2.getUsername());
+    		
+    		tx.run("MATCH (u1:Users),(u2:Users) "
+	    			+ " WHERE u1.username=$username_u1 and u2.username=$username_u2"
+	    			+ " CREATE(u1)-[f:FOLLOWS]->(u2) RETURN f", params);
+	    	
+	    	return;
 	    }
 	    
 	    
@@ -431,6 +525,7 @@ public class UserEntityManager {
 	    			public Void execute(Transaction tx) {
 	    				deleteUserMovies(tx, user);
 	    				deleteUserRatings(tx, user);
+	    				deleteUserFollow(tx, user);
 	    				deleteUser(tx, user);
 	    				return null;
 	    			}
@@ -454,6 +549,15 @@ public class UserEntityManager {
     		params.put("username", u.getUsername());
     		
 	    	tx.run("MATCH (n { username: $username'})-[r:RATES]-() delete r", params);
+	    	
+	    	return;
+	    }
+
+	    private static void deleteUserFollow(Transaction tx, User u) {
+	    	Map<String, Object> params = new HashMap<>();
+    		params.put("username", u.getUsername());
+    		
+	    	tx.run("MATCH (n {username: $username'})-[:FOLLOWS]-() delete n", params);
 	    	
 	    	return;
 	    }

@@ -14,22 +14,32 @@ public class Film {
 	private final String title;
 	private final String genre;
 	private final String plot;
-	private final String release_year;
+	private final String release_date;
 	private final int weekly_price;
 	private final String production_company;
 	private final int budget;
+	private final int revenue;
+	private final String production_country;
+	private final String language;
+	private final String runtime;
+	private final int vote_count;
 	private double vote_avg;
 	
 	
 	public Film() {
 		this.idFilm=0;
-		this.production_company="";
-		this.genre=null;
+		this.production_company = "";
+		this.genre = null;
 		this.title = "";
-		this.release_year= null;
+		this.release_date = null;
 		this.weekly_price = 0;
 		this.plot = "";
-		this.budget=0;
+		this.budget = 0;
+		this.revenue = 0;
+		this.production_country = "";
+		this.language = "";
+		this.runtime = "";
+		this.vote_count = 0;
 		this.vote_avg=0.0;
 	}
 	
@@ -39,10 +49,15 @@ public class Film {
         this.title = title;
 		this.genre = genre;
 		this.plot = plot;
-		this.release_year = releaseYear;
+		this.release_date = releaseYear;
 		this.weekly_price = weeklyPrice;
 		this.production_company = production_company;
 		this.budget = budget;
+		this.revenue = 0;
+		this.production_country = "";
+		this.language = "";
+		this.runtime = "";
+		this.vote_count = 0;
 
 	}
 	
@@ -52,23 +67,54 @@ public class Film {
         this.title = title;
 		this.genre = genre;
 		this.plot = plot;
-		this.release_year = releaseYear;
+		this.release_date = releaseYear;
 		this.weekly_price = weeklyPrice;
 		this.production_company = production_company;
 		this.budget = budget;
+		this.revenue = 0;
+		this.production_country = "";
+		this.language = "";
+		this.runtime = "";
+		this.vote_count = 0;
 	}
+	
 	public Film(int idFilm, String title, String genre, String plot, String releaseYear, int weeklyPrice, String production_company,int budget, double vote_avg) {
 
 		this.idFilm = idFilm;
         this.title = title;
 		this.genre = genre;
 		this.plot = plot;
-		this.release_year = releaseYear;
+		this.release_date = releaseYear;
 		this.weekly_price = weeklyPrice;
 		this.production_company = production_company;
 		this.budget = budget;
 		this.vote_avg = vote_avg;
+		this.revenue = 0;
+		this.production_country = "";
+		this.language = "";
+		this.runtime = "";
+		this.vote_count = 0;
 	}
+	
+
+	public Film(int idFilm, String title, String genre, String plot, String releaseYear, int weeklyPrice, String production_company,int budget, int revenue,String production_country, String language, String runtime, int vote_count, double vote_avg) {
+
+		this.idFilm = idFilm;
+        this.title = title;
+		this.genre = genre;
+		this.plot = plot;
+		this.release_date = releaseYear;
+		this.weekly_price = weeklyPrice;
+		this.production_company = production_company;
+		this.budget = budget;
+		this.revenue = revenue;
+		this.production_country = production_country;
+		this.language = language;
+		this.runtime = runtime;
+		this.vote_count = vote_count;
+		this.vote_avg = vote_avg;
+	}
+	
 	public int getIdFilm(){
 		return this.idFilm;
 	}
@@ -81,8 +127,8 @@ public class Film {
 	public String getPlot(){
 		return this.plot;
 	}
-	public String getReleaseYear(){
-		return this.release_year;
+	public String getReleaseDate(){
+		return this.release_date;
 	}
 	public int getWeeklyPrice() {
 		return this.weekly_price;
@@ -93,25 +139,43 @@ public class Film {
 	public int getBudget() {
 		return this.budget;
 	}
-	
 	public double getVoteAvg() {
 		return this.vote_avg;
+	}
+	public int getRevenue(){
+		return this.revenue;
+	}
+	public String getProductionCountry() {
+		return this.production_country;
+	}
+	public String getLanguage() {
+		return this.language;
+	}
+	public String getRuntime() {
+		return this.runtime;
+	}
+	public int getVoteCount() {
+		return this.vote_count;
 	}
 	public void setVoteAvg(double vote) {
 		this.vote_avg = vote;
 	}
 
 	
-
 	public Film(Film f){
 		this.idFilm = f.getIdFilm();
         this.title = f.getTitle();
 		this.genre = f.getGenre();
 		this.plot = f.getPlot();
-		this.release_year = f.getReleaseYear();
+		this.release_date = f.getReleaseDate();
 		this.weekly_price = f.getWeeklyPrice();
 		this.production_company = f.getProductionCompany();
 		this.budget = f.getBudget();
+		this.revenue = f.getRevenue();
+		this.production_country = f.getProductionCountry();
+		this.language = f.getLanguage();
+		this.runtime = f.getRuntime();
+		this.vote_count = f.getVoteCount();
 		this.vote_avg = f.getVoteAvg();
 
 	}

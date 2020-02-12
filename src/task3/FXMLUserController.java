@@ -62,6 +62,7 @@ public class FXMLUserController implements Initializable {
 		
 	//textfield for live search of a film by title
 	@FXML private TextField search_field;	
+	@FXML private TextField search_user;	
 	
 	//objects for user's profile
 	@FXML private Label infouser_username_field;
@@ -246,8 +247,7 @@ public class FXMLUserController implements Initializable {
 			}
 		}
 		
-	}
-	
+	}	
 	
 	//loading current user's informations
 	public void initUser(User u) {
@@ -278,34 +278,33 @@ public class FXMLUserController implements Initializable {
         
 	}
 	
+	public void follow() {
+		User selectedUser = all_user_table.getSelectionModel().getSelectedItem();
+		
+		UserEntityManager.followUser(current_user, selectedUser);
+		initFollowed();
+	}
 	
-	//visualizing all the films in the selected rent
-//	public void getSelectedRent(){
-//		//cleaning the table and getting the selected rental
-//		rented_film.clear();
-//		Rental r = rental_table.getSelectionModel().getSelectedItem();
-//	System.out.println(r.getFilmList());
-//		if(r != null) {//if it isn't an empty row
-//			//filling the table with all the films for the selected rental
-//			Set<Film> setFilm;
-//			List<Film> list = new ArrayList<>();
-//			setFilm = r.getFilmList();
-//			
-//			rented_film.addAll(setFilm);
-//			
-//			//checking for expired rentals
-//			if(LocalDate.now().getDayOfMonth() >= r.getStartDate().getDayOfMonth()+7) {
-//				//opening an alert window
-//				Alert windowAlert = new Alert(AlertType.INFORMATION);
-//				windowAlert.setHeaderText("Expired rent!");
-//				windowAlert.setContentText("You can't watch these rented movies because 7 days have passed from the rental");
-//				windowAlert.setTitle("Warning");
-//				windowAlert.showAndWait();
-//			}
-//		}
-//		
-//		
-//	}
+	public void setUserSearched() {
+		String s = search_user.getText();
+		if(s.length() > 0 )
+			getUserSearched(s);
+		else
+			all_user_table.setItems(all_user);
+	}
+	
+	//searching for user beginning with the string got from the field
+	public void getUserSearched(String s) {
+		ObservableList<User> list = FXCollections.observableArrayList();
+		s = s.toLowerCase();
+		String tmp;
+		for(User u : this.all_user) {
+			tmp = u.getUsername();
+			if(tmp.startsWith(s))
+				list.add(u);
+		}
+		all_user_table.setItems(list);
+	}
 	
 	//showing film's details
 	public void showDetails(MouseEvent event) throws IOException{
@@ -367,10 +366,10 @@ public class FXMLUserController implements Initializable {
 		//refresh of user info in case one or more rental are done in this session and the user want to delete the account 
 		//immediately after that
 		
-		User tmp = null;
+		//User tmp = current_user;
 		
 		//tmp = new User(UserEntityManager.refreshUser(current_user));
-		current_user = tmp;
+		//current_user = tmp;
 		
 		
 		this.infouser_username_field.setText(current_user.getUsername());
