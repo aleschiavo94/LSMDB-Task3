@@ -21,7 +21,7 @@ public class Film {
 	private final int revenue;
 	private final String production_country;
 	private final String language;
-	private final String runtime;
+	private final int runtime;
 	private final int vote_count;
 	private double vote_avg;
 	
@@ -38,7 +38,7 @@ public class Film {
 		this.revenue = 0;
 		this.production_country = "";
 		this.language = "";
-		this.runtime = "";
+		this.runtime = 0;
 		this.vote_count = 0;
 		this.vote_avg=0.0;
 	}
@@ -56,7 +56,7 @@ public class Film {
 		this.revenue = 0;
 		this.production_country = "";
 		this.language = "";
-		this.runtime = "";
+		this.runtime = 0;
 		this.vote_count = 0;
 
 	}
@@ -74,7 +74,7 @@ public class Film {
 		this.revenue = 0;
 		this.production_country = "";
 		this.language = "";
-		this.runtime = "";
+		this.runtime = 0;
 		this.vote_count = 0;
 	}
 	
@@ -92,12 +92,12 @@ public class Film {
 		this.revenue = 0;
 		this.production_country = "";
 		this.language = "";
-		this.runtime = "";
+		this.runtime =0 ;
 		this.vote_count = 0;
 	}
 	
 
-	public Film(int idFilm, String title, String genre, String plot, String releaseYear, int weeklyPrice, String production_company,int budget, int revenue,String production_country, String language, String runtime, int vote_count, double vote_avg) {
+	public Film(int idFilm, String title, String genre, String plot, String releaseYear, int weeklyPrice, String production_company,int budget, int revenue,String production_country, String language, int runtime, int vote_count, double vote_avg) {
 
 		this.idFilm = idFilm;
         this.title = title;
@@ -151,7 +151,7 @@ public class Film {
 	public String getLanguage() {
 		return this.language;
 	}
-	public String getRuntime() {
+	public int getRuntime() {
 		return this.runtime;
 	}
 	public int getVoteCount() {

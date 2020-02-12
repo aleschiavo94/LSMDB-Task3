@@ -76,7 +76,7 @@ public class FXMLFilmDetailsController implements Initializable{
 		revenue_label.setText(Integer.toString(f.getRevenue()));
 		country_label.setText(f.getProductionCountry());
 		language_label.setText(f.getLanguage());
-		runtime_label.setText(f.getRuntime());
+		runtime_label.setText(Integer.toString(f.getRuntime()));
 		company_label.setText(f.getProductionCompany());
 		double rating = UserEntityManager.getVote(current_film);
 		int vote_count = UserEntityManager.getCount(current_film);
@@ -86,10 +86,7 @@ public class FXMLFilmDetailsController implements Initializable{
 		
 		group = new ToggleGroup();
 		
-		//searching for all the rating for the current film
-//		Rating r;
-//		List<Rating> rating_film = new ArrayList<>(f.getRatingList());
-		
+
 		if(!current_user.getUsername().equals("admin")) {
 			rate_list.setVisible(false);
 			list_label.setVisible(false);
@@ -100,18 +97,12 @@ public class FXMLFilmDetailsController implements Initializable{
 			radiobutton4.setToggleGroup(group);
 			radiobutton5.setToggleGroup(group);
 			
-//			if(rating_film.size() > 0) { //if the current film has at least one rate
-//			
-//				//getting all the rates for the current film
-//				for (Iterator<Rating> it = rating_film.iterator(); it.hasNext(); ) {
-//					r = it.next();
-//				
-//					//if the current user has already rated the current film, the button is disabled
-//					if(r.getUser().getUsername().equals(current_user.getUsername())) {
-//						submit_button.setDisable(true);
-//					}
-//				}
-//			}
+			//if the current user has already rated the current film, the button is disabled
+			boolean rated = UserEntityManager.searchRating(current_user, current_film);
+			
+			if(rated == true) {
+				submit_button.setDisable(true);
+			}
 		}else {
 			radiobutton1.setVisible(false);
 			radiobutton2.setVisible(false);
@@ -150,14 +141,17 @@ public class FXMLFilmDetailsController implements Initializable{
 			//adding the new rate
 			r = new Rating(current_user, current_film, LocalDate.now(), value);
 		
-//			UserEntityManager.insertRating(r);
+			UserEntityManager.insertRating(r);
+			
+			UserEntityManager.updateMovieRate(current_film, value);
 			
 			//updating film's informations
 //			current_film = UserEntityManager.refreshFilm(current_film);
 			
 			//calculating the new mean rate and changing the value in the label
-//			Integer mean = getRating(current_film);
-//			rating_label.setText(mean.toString());
+			//int vote_count = UserEntityManager.getCount(current_film);
+			//Integer mean = UserEntityManager.getVote(current_film);
+			rating_label.setText(current_film.getVoteAvg()+"/5 out of " + current_film.getVoteCount() + " votes");
 			
 			//disabling the button to not rate again
 			submit_button.setDisable(true);
@@ -169,29 +163,5 @@ public class FXMLFilmDetailsController implements Initializable{
 		
     }
 	
-	   //calculating and retrieving the rating given a film
-//	   public Integer getRating(Film f) {
-//		   Integer avg=0; //mean
-//		   Integer sum=0; //sum of rates
-//		   Integer n=0; //number of rates
-//		   
-//		   try {
-//			  for (Iterator<Rating> it = f.getRatingList().iterator(); it.hasNext(); ) {
-//		        	Rating r = it.next();
-//		            sum+=r.getVote();
-//		            n+=1;
-//		        }
-//			   if(n !=0) {
-//				   avg=sum/n;
-//			   }else {
-//				   avg=0;
-//			   }
-//		       
-//			} catch (Exception ex) {
-//				ex.printStackTrace();
-//				System.out.println("A problem occurred in retrieving the rate!");
-//
-//			} 
-//		   return avg;
-//	   }
+	  
 }

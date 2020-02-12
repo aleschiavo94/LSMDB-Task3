@@ -1,8 +1,12 @@
 package task3;
 
+
+import java.sql.Timestamp;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -191,7 +195,7 @@ public class UserEntityManager {
 	    					int revenue = rec.get("revenue").asInt();
 	    					String production_country = rec.get("production_countries").asString();
 	    					String language = rec.get("original_language").asString();
-	    					String runtime = ""; //rec.get("duration").asInt();
+	    					int runtime = rec.get("duration").asInt();
 	    					int vote_count = rec.get("vote_count").asInt();
 	    					double vote_avg = Double.parseDouble(rec.get("vote_avg").asString());
 	    					
@@ -205,6 +209,19 @@ public class UserEntityManager {
 	    	}
 	    	
 	    	return list;
+	    }
+	    
+	    
+	    private static StatementResult matchFilms(Transaction tx){
+	    	StatementResult result=tx.run("MATCH(ff:Movies) RETURN ff.id AS id, ff.title AS title,"
+	    			+ "ff.genres AS genre, ff.overview AS plot, ff.release_date AS year,"
+	    			+ "ff.weeklyPrice AS weeklyPrice, ff.production_companies AS production_companies,"
+	    			+ "ff.budget AS budget, ff.revenue AS revenue, ff.production_countries AS production_countries,"
+	    			+ "ff.original_language AS language, ff.runtime AS duration, ff.vote_count AS vote_count,"
+	    			+ "ff.vote_average as vote_avg");
+
+	    	
+	    	return result;
 	    }
 	    
 	    public static int getVote(Film f) {
@@ -267,17 +284,158 @@ public class UserEntityManager {
 	    	return result;
 	    }
 	    
+	    //search if the user has already rated the film
+	    public static boolean searchRating(User user, Film f) {
+	    	boolean found;
+	    	try(Session session = driver.session()){
+	    		found = session.readTransaction(new TransactionWork<Boolean>() {
+	    			@Override
+	    			public Boolean execute(Transaction tx) {
+	    				StatementResult res = matchRating(tx, user.getUsername(), f.getTitle());
+	    				
+	    				
+	    				if(res.hasNext()) {
+	    					return true;
+	    				}else {
+	    					return false;
+	    				}
+	    				
+	    			}
+	    		});
+	    	}
+	    	return found;
+	    }
 	    
-	    private static StatementResult matchFilms(Transaction tx){
-	    	StatementResult result=tx.run("MATCH(ff:Movies) RETURN ff.id AS id, ff.title AS title,"
-	    			+ "ff.genres AS genre, ff.overview AS plot, ff.release_date AS year,"
-	    			+ "ff.weeklyPrice AS weeklyPrice, ff.production_companies AS production_companies,"
-	    			+ "ff.budget AS budget, ff.revenue AS revenue, ff.production_countries AS production_countries,"
-	    			+ "ff.original_language AS language, ff.runtime AS duration, ff.vote_count AS vote_count,"
-	    			+ "ff.vote_average as vote_avg");
-
+	    private static StatementResult matchRating(Transaction tx, String username, String title) {
+	    	Map<String, Object> params = new HashMap<>();
+    		params.put("username", username);
+    		params.put("title", title);
+    		
+    		StatementResult result = tx.run("MATCH(ee:Users) -[r:RATES]-(ff:Movies) "
+    				+ "where ee.username=$username and ff.title=$title "
+    				+ "return r.vote", params);
 	    	
 	    	return result;
+	    }
+	    
+	    
+	    //inserting a new rating for the user
+	    public static void insertRating(Rating r) {
+	    	
+	    	try(Session session = driver.session()){
+	    		session.writeTransaction(new TransactionWork<Void>() {
+	    			@Override
+	    			public Void execute(Transaction tx) {
+	    				LocalDate localDate = r.getDate();
+	    				Date date = Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());  
+	    				int time = (int) (date.getTime()/1000);
+	    				createRating(tx, r.getUser().getUsername(), r.getFilm().getTitle(), r.getVote(), time);
+	    				return null;
+	    			}
+	    		});
+	    	}
+	    	
+	    	return;
+	    } 
+	    
+	    private static void createRating(Transaction tx, String username, String title, int vote, int ts) {
+	    	Map<String, Object> params = new HashMap<>();
+    		params.put("username", username);
+    		params.put("title", title);
+    		params.put("ts", ts);
+    		params.put("vote", vote);
+    		
+	    	tx.run("MATCH (ee:Users),(ff:Movies)\r\n" + 
+	    			"WHERE ee.username=$username and ff.title=$title\r\n" + 
+	    			"CREATE (ee)-[r:RATES{vote:$vote, timestamp:$ts}]->(ff)", params);
+	    	
+	    	return;
+	    }
+	    
+	    //updating rate's info for the movie
+	    public static void updateMovieRate(Film f, int rate) {
+	    	int[]count= {0};
+	    	int[] avg= {0};
+	    	
+	    	try(Session session = driver.session()){
+	    		count[0] = session.readTransaction(new TransactionWork<Integer>() {
+	    			@Override
+	    			public Integer execute(Transaction tx) {
+	    				int match;
+	    				Record result = matchMovieCount(tx, f.getTitle());
+	    				
+	    				match = result.get("vote_count").asInt();
+	    				
+	    				return match;
+	    			}
+	    		});
+	    		
+	    		avg[0] = session.readTransaction(new TransactionWork<Integer>() {
+	    			@Override
+	    			public Integer execute(Transaction tx) {
+	    				String match;
+	    				Record result = matchMovieAvg(tx, f.getTitle());
+	    				
+	    				match = result.get("vote_average").asString();
+	    				
+	    				return Integer.parseInt(match);
+	    			}
+	    		});
+	    	}
+	    	
+	    	count[0]=count[0]+1;
+			avg[0]=((avg[0]+rate)/2);
+			
+			String average=Integer.toString(avg[0]);
+	
+			
+	    	try(Session session = driver.session()){
+	    		session.writeTransaction(new TransactionWork<Void>() {
+	    			@Override
+	    			public Void execute(Transaction tx) {
+	    				
+	    				updateMovieRating(tx, f.getTitle(), average, count[0]);
+	    				return null;
+	    			}
+	    		});
+	    	}
+	    	
+	    	return;
+	    } 
+	    
+	    private static Record matchMovieCount(Transaction tx, String title) {
+	    	Map<String, Object> params = new HashMap<>();
+    		params.put("title", title);
+    		
+	    	StatementResult res = tx.run("MATCH(ff:Movies)\r\n" + 
+	    			"WHERE  ff.title=\"Toy Story\"\r\n" + 
+	    			"RETURN ff.vote_count as vote_count", params);
+	    	
+	    	return res.single();
+	    }
+	    
+	    private static Record matchMovieAvg(Transaction tx, String title) {
+	    	Map<String, Object> params = new HashMap<>();
+    		params.put("title", title);
+    		
+	    	StatementResult res = tx.run("MATCH(ff:Movies)\r\n" + 
+	    			"WHERE  ff.title=\"Toy Story\"\r\n" + 
+	    			"RETURN ff.vote_average as vote_average", params);
+	    	
+	    	return res.single();
+	    }
+	    
+	    private static Void updateMovieRating(Transaction tx, String title, String avg, int count) {
+	    	Map<String, Object> params = new HashMap<>();
+    		params.put("title", title);
+    		params.put("avg", avg);
+    		params.put("count", count);
+    		
+	    	tx.run("MATCH(ff:Movies)\r\n" + 
+	    			"WHERE  ff.title=$title\r\n" + 
+	    			"SET ff.vote_count=$count , ff.vote_average=$avg", params);
+	    	
+	    	return null;
 	    }
 	    
 	    //inserting a new rental for the user
