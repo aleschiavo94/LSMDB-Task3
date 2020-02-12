@@ -75,11 +75,13 @@ public class FXMLDocumentController implements Initializable {
             	FXMLLoader loader = new FXMLLoader();
                 loader.setLocation(getClass().getResource(resource));
                 
+                
+                
               //passing user's informations to the new controller FXMLUserController
                  root = (Parent) loader.load();
-                		
-                FXMLUserController controller = loader.getController();
-                controller.initUser(user);
+                 FXMLUserController controller = loader.getController();
+                 controller.initUser(user);		
+                
             }
             
             

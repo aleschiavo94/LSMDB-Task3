@@ -147,10 +147,7 @@ public class FXMLUserController implements Initializable {
 		top_rate_film.setItems(top_rate_list);
 		
 		
-		following_film_column.setCellValueFactory(new PropertyValueFactory<Film, String>("title"));
-		following_film = FXCollections.observableArrayList();
-		following_film.addAll(UserEntityManager.getFollowingFilms());
-		following_film_table.setItems(following_film);
+		
     }  
 	
 	
@@ -252,6 +249,11 @@ public class FXMLUserController implements Initializable {
 	//loading current user's informations
 	public void initUser(User u) {
 		this.current_user = new User(u);
+		following_film_column.setCellValueFactory(new PropertyValueFactory<Film, String>("title"));
+		following_film = FXCollections.observableArrayList();
+		following_film.addAll(UserEntityManager.getFollowingFilms(this.current_user));
+		following_film_table.setItems(following_film);
+		
 	}
 	
 	
@@ -442,7 +444,7 @@ public class FXMLUserController implements Initializable {
 		}
 		
 	
-		//UserEntityManager.removeUser(current_user, film_in_db);
+		UserEntityManager.removeUser(current_user);
 		
 		//closing the window
 		 Parent root;
