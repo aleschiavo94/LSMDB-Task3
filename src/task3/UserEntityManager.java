@@ -163,6 +163,7 @@ public class UserEntityManager {
 	    	
 	    }
 	    
+	   
 	    
 	    /*
 	     * USER CONTROLLER FUNCTIONS
@@ -625,10 +626,12 @@ public class UserEntityManager {
 	    		session.writeTransaction(new TransactionWork<Void>() {
 	    			@Override
 	    			public Void execute(Transaction tx) {
-	    				deleteUserMovies(tx, user);
+	    				System.out.println("entra");
+	    				/*deleteUserMovies(tx, user);
 	    				deleteUserRatings(tx, user);
 	    				deleteUserFollow(tx, user);
-	    				deleteUser(tx, user);
+	    				deleteUser(tx, user);*/
+	    				deleteUserDetach(tx, user);
 	    				return null;
 	    			}
 	    		});
@@ -637,7 +640,47 @@ public class UserEntityManager {
 	    	return;
 	    } 
 	    
-	    private static void deleteUserMovies(Transaction tx, User u) {
+	    private static void deleteUserDetach(Transaction tx, User u) {
+	    	Map<String, Object> params = new HashMap<>();
+    		params.put("username", u.getUsername());
+	    	tx.run("MATCH (n:Users ) WHERE n.username = $username DETACH DELETE n", params);
+	    	
+	    	return;
+	    }
+	    
+	    
+    	public static void updateUserInfo(User user) {
+	    	
+	    	try(Session session = driver.session()){
+	    		session.writeTransaction(new TransactionWork<Void>() {
+	    			@Override
+	    			public Void execute(Transaction tx) {
+	    				/*deleteUserMovies(tx, user);
+	    				deleteUserRatings(tx, user);
+	    				deleteUserFollow(tx, user);
+	    				deleteUser(tx, user);*/
+	    				updateUserNode(tx, user);
+	    				return null;
+	    			}
+	    		});
+	    	}
+	    	
+	    	return;
+	    } 
+    	 private static void updateUserNode(Transaction tx, User u) {
+ 	    	Map<String, Object> params = new HashMap<>();
+     		params.put("username", u.getUsername());
+     		params.put("password", u.getPassword());
+     		params.put("credit", u.getCredit());
+     		params.put("email", u.getEmail());
+     		//params.put("credit", u.);
+     		
+ 	    	tx.run("MATCH (n:Users ) WHERE n.username = $username " +
+ 	    			"SET n.email=$email, n.credit=$credit, n.password=$password", params);
+ 	    	
+ 	    	return;
+ 	    }
+	    /*private static void deleteUserMovies(Transaction tx, User u) {
 	    	Map<String, Object> params = new HashMap<>();
     		params.put("username", u.getUsername());
     		
@@ -671,7 +714,7 @@ public class UserEntityManager {
 	    	tx.run("MATCH (n { username: $username'}) delete n", params);
 	    	
 	    	return;
-	    }
+	    }*/
 
 	    
 	    public static List<Film> getTopRentedFilms(){
@@ -764,7 +807,7 @@ public class UserEntityManager {
 	    //QUERY PER PRENDERE I FILM DI CHI FOLLOWA L'USER, CAMBIANDO LA FRECCIA SI PRENDE I FILM DI CHI è FOLLOWATO DALL'USER
 	    //match (u:Users{username: 'adam'})<-[f:FOLLOWS]-(u2:Users)-[r:RENTS]-(m:Movies)
 	    //return distinct(m.title)
-	    public static List<Film> getFollowingFilms(){
+	    public static List<Film> getFollowingFilms(User u){
 	    	List<Record> list;
 	    	List<Film> films = new ArrayList<>();
 	    	
@@ -772,7 +815,7 @@ public class UserEntityManager {
 	    		list = session.readTransaction(new TransactionWork<List<Record>>() {
 	    			@Override
 	    			public List<Record> execute(Transaction tx) {	
-	    				return followingFilms(tx);
+	    				return followingFilms(tx, u);
 	    			}
 	    		});
 	    		
@@ -794,12 +837,15 @@ public class UserEntityManager {
 	    	return films;
 	    } 
 	    
-	    private static List<Record> followingFilms(Transaction tx){
-    		List<Record> result=tx.run("MATCH (u:Users{username: 'adam'})<-[t:FOLLOWS]-(u2:Users)-[r:RENTS]-(movie)"+
+	    private static List<Record> followingFilms(Transaction tx, User u){
+	    	Map<String, Object> params = new HashMap<>();
+    		params.put("username", u.getUsername());
+    		List<Record> result=tx.run("MATCH (u:Users)-[t:FOLLOWS]->(u2:Users)-[r:RENTS]-(movie)"+
+    				"where u.username = $username " +
     				"return distinct movie.id as id, movie.title as title,"+
     				"movie.production_companies as production_company, movie.budget as budget,"+
     				"movie.release_date as year, movie.overview as plot, movie.genres as genre,"+
-    				"movie.weeklyPrice as weeklyPrice, movie.vote_average as vote_avg").list();
+    				"movie.weeklyPrice as weeklyPrice, movie.vote_average as vote_avg", params).list();
 
 	    	return result;
 	    }
