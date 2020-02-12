@@ -174,19 +174,22 @@ public class UserEntityManager {
 	    			public List<Film> execute(Transaction tx) {
 	    				List<Film> films = new ArrayList<>();
 	    				StatementResult res = matchFilms(tx);
-	    				
+	    				//System.out.println(res.list().size());
+	    				int i  = 0;
+	    				Record rec;
 	    				while(res.hasNext()) {
+	    					rec = res.next();
 	    					
-	    		    		int id = res.next().get("id").asInt();
-	    					String title = res.next().get("title").asString();
-	    					String genre = res.next().get("genre").asString();
-	    					String plot = res.next().get("plot").asString();
-	    					String year = res.next().get("year").asString();
-	    					int price = res.next().get("weeklyPrice").asInt();
-	    					String prod = res.next().get("production_company").asString();
-	    					int budget = res.next().get("budget").asInt();
-	    					
-	    		    		films.add(new Film(id, title, genre, plot, year, price, prod, budget));
+	    		    		int id = rec.get("id").asInt();
+	    					String title = rec.get("title").asString();
+	    					String genre = rec.get("genre").asString();
+	    					String plot = rec.get("plot").asString();
+	    					String year = rec.get("year").asString();
+	    					int price = rec.get("weeklyPrice").asInt();
+	    					String prod = rec.get("production_company").asString();
+	    					int budget = rec.get("budget").asInt();
+	    					double vote_avg = Double.parseDouble(rec.get("vote_avg").asString());
+	    		    		films.add(new Film(id, title, genre, plot, year, price, prod, budget, vote_avg));
 	    		    		
 	    		    	}
 	    				return films;
@@ -202,7 +205,7 @@ public class UserEntityManager {
 	    	StatementResult result=tx.run("MATCH(ff:Movies) RETURN ff.id AS id, ff.title AS title,"
 	    			+ "ff.genres AS genre, ff.overview AS plot, ff.release_date AS year,"
 	    			+ "ff.weeklyPrice AS weeklyPrice, ff.production_company AS production_company,"
-	    			+ "ff.budget AS budget;");
+	    			+ "ff.budget AS budget, ff.vote_average as vote_avg");
 
 	    	
 	    	return result;
@@ -277,7 +280,7 @@ public class UserEntityManager {
 	    	Map<String, Object> params = new HashMap<>();
     		params.put("username", u.getUsername());
     		
-	    	List<Record> result = tx.run("MATCH (ee:Users)-[r:FOLLOWS]-(friends) "
+	    	List<Record> result = tx.run("MATCH (ee:Users)-[r:FOLLOWS]->(friends) "
 	    			+ "WHERE ee.username =$username return friends.id AS id, "
 	    			+ "friends.username AS username, friends.password AS password,"
 	    			+ "friends.surname AS surname, friends.name AS name,"
@@ -486,8 +489,8 @@ public class UserEntityManager {
 					int price = res.get("weeklyPrice").asInt();
 					String prod = res.get("production_company").asString();
 					int budget = res.get("budget").asInt();
-					
-		    		films.add(new Film(id, title, genre, plot, year, price, prod, budget));
+					double vote_avg = Double.parseDouble(res.get("vote_avg").asString());
+		    		films.add(new Film(id, title, genre, plot, year, price, prod, budget, vote_avg));
 		    		
 		    	} 
 			}
@@ -501,7 +504,7 @@ public class UserEntityManager {
     				"return ff.id AS id, ff.title AS title," + 
     				"ff.genres AS genre, ff.overview AS plot, ff.release_date AS year," + 
     				"ff.weeklyPrice AS weeklyPrice, ff.production_company AS production_company," + 
-    				"ff.budget AS budget, count(r) as conta " + 
+    				"ff.budget AS budget, ff.vote_average as vote_avg, count(r) as conta " + 
     				"ORDER BY conta " + 
     				"DESC LIMIT 10").list();
 
@@ -530,8 +533,8 @@ public class UserEntityManager {
 					int price = res.get("weeklyPrice").asInt();
 					String prod = res.get("production_company").asString();
 					int budget = res.get("budget").asInt();
-					
-		    		films.add(new Film(id, title, genre, plot, year, price, prod, budget));
+					double vote_avg = Double.parseDouble(res.get("vote_avg").asString());
+		    		films.add(new Film(id, title, genre, plot, year, price, prod, budget, vote_avg));
 		    		
 		    	} 
 			}
@@ -545,10 +548,56 @@ public class UserEntityManager {
     				"return ff.id AS id, ff.title AS title," + 
     				"ff.genres AS genre, ff.overview AS plot, ff.release_date AS year," + 
     				"ff.weeklyPrice AS weeklyPrice, ff.production_company AS production_company," + 
-    				"ff.budget AS budget, sum(r.vote) as rate " + 
+    				"ff.budget AS budget, ff.vote_average as vote_avg, sum(r.vote) as rate " + 
     				"ORDER BY rate " + 
     				"DESC LIMIT 10").list();
 
 	    	return result;
 	    }
+	    
+	    //QUERY PER PRENDERE I FILM DI CHI FOLLOWA L'USER, CAMBIANDO LA FRECCIA SI PRENDE I FILM DI CHI è FOLLOWATO DALL'USER
+	    //match (u:Users{username: 'adam'})<-[f:FOLLOWS]-(u2:Users)-[r:RENTS]-(m:Movies)
+	    //return distinct(m.title)
+	    public static List<Film> getFollowingFilms(){
+	    	List<Record> list;
+	    	List<Film> films = new ArrayList<>();
+	    	
+	    	try(Session session = driver.session()){
+	    		list = session.readTransaction(new TransactionWork<List<Record>>() {
+	    			@Override
+	    			public List<Record> execute(Transaction tx) {	
+	    				return followingFilms(tx);
+	    			}
+	    		});
+	    		
+	    		for(Record res: list) {
+	    	  		int id = res.get("id").asInt();
+					String title = res.get("title").asString();
+					String genre = res.get("genre").asString();
+					String plot = res.get("plot").asString();
+					String year = res.get("year").asString();
+					int price = res.get("weeklyPrice").asInt();
+					String prod = res.get("production_company").asString();
+					int budget = res.get("budget").asInt();
+					double vote_avg = Double.parseDouble(res.get("vote_avg").asString());
+		    		films.add(new Film(id, title, genre, plot, year, price, prod, budget, vote_avg));
+		    		
+		    	} 
+			}
+
+	    	return films;
+	    } 
+	    
+	    private static List<Record> followingFilms(Transaction tx){
+    		
+    		List<Record> result=tx.run("MATCH (u:Users{username: 'adam'})<-[t:FOLLOWS]-(u2:Users)-[r:RENTS]-(movie)"+
+    				"return distinct movie.id as id, movie.title as title,"+
+    				"movie.production_companies as production_company, movie.budget as budget,"+
+    				"movie.release_date as year, movie.overview as plot, movie.genres as genre,"+
+    				"movie.weeklyPrice as weeklyPrice, movie.vote_average as vote_avg").list();
+
+	    	return result;
+	    }
+	    
+	    
 }

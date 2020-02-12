@@ -9,9 +9,9 @@
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.text.Font?>
 
-<ScrollPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="task3.FXMLFilmDetailsController">
+<ScrollPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="518.0" prefWidth="704.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="task3.FXMLFilmDetailsController">
    <content>
-      <Pane prefHeight="398.0" prefWidth="596.0" style="-fx-background-color: #1C0001;">
+      <Pane prefHeight="507.0" prefWidth="694.0" style="-fx-background-color: #1C0001;">
          <children>
             <Label fx:id="title_label" layoutX="45.0" layoutY="34.0" text="Titolo" textFill="#db6063">
                <font>
@@ -93,7 +93,7 @@
                   <Font size="13.0" />
                </font>
             </RadioButton>
-            <ListView fx:id="rate_list" layoutX="345.0" layoutY="235.0" prefHeight="145.0" prefWidth="130.0" />
+            <ListView fx:id="rate_list" layoutX="510.0" layoutY="342.0" prefHeight="145.0" prefWidth="130.0" />
             <Label fx:id="list_label" layoutX="345.0" layoutY="199.0" prefHeight="27.0" prefWidth="134.0" text="List of ratings:" textFill="#db6063">
                <font>
                   <Font size="18.0" />

@@ -66,8 +66,8 @@ public class FXMLFilmDetailsController implements Initializable{
 		
 		title_label.setText(f.getTitle());
 		genre_label.setText(f.getGenre());
-		year_label.setText(Integer.toString(f.getReleaseYear()));
-		director_label.setText(f.getDirector());
+		year_label.setText(f.getReleaseYear());
+		//director_label.setText(f.getDirector());
 		plot_area.setText(f.getPlot());
 		
 		group = new ToggleGroup();

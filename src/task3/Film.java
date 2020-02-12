@@ -18,8 +18,7 @@ public class Film {
 	private final int weekly_price;
 	private final String production_company;
 	private final int budget;
-	private Set<Rental> rentalList;
-	private Set<Rating> ratings;
+	private double vote_avg;
 	
 	
 	public Film() {
@@ -31,6 +30,7 @@ public class Film {
 		this.weekly_price = 0;
 		this.plot = "";
 		this.budget=0;
+		this.vote_avg=0.0;
 	}
 	
 	public Film(int idFilm, String title, String genre, String plot, String releaseYear, int weeklyPrice, String production_company,int budget) {
@@ -43,6 +43,7 @@ public class Film {
 		this.weekly_price = weeklyPrice;
 		this.production_company = production_company;
 		this.budget = budget;
+
 	}
 	
 	public Film( String title, String genre, String plot, String releaseYear, int weeklyPrice, String production_company, int budget) {
@@ -56,7 +57,18 @@ public class Film {
 		this.production_company = production_company;
 		this.budget = budget;
 	}
+	public Film(int idFilm, String title, String genre, String plot, String releaseYear, int weeklyPrice, String production_company,int budget, double vote_avg) {
 
+		this.idFilm = idFilm;
+        this.title = title;
+		this.genre = genre;
+		this.plot = plot;
+		this.release_year = releaseYear;
+		this.weekly_price = weeklyPrice;
+		this.production_company = production_company;
+		this.budget = budget;
+		this.vote_avg = vote_avg;
+	}
 	public int getIdFilm(){
 		return this.idFilm;
 	}
@@ -82,14 +94,13 @@ public class Film {
 		return this.budget;
 	}
 	
-	
-	public Set<Rating> getRatingList(){
-		return this.ratings;
+	public double getVoteAvg() {
+		return this.vote_avg;
 	}
-	
-	public Set<Rental> getRentalList(){
-		return this.rentalList;
+	public void setVoteAvg(double vote) {
+		this.vote_avg = vote;
 	}
+
 	
 
 	public Film(Film f){
@@ -101,9 +112,8 @@ public class Film {
 		this.weekly_price = f.getWeeklyPrice();
 		this.production_company = f.getProductionCompany();
 		this.budget = f.getBudget();
-		
-		this.ratings = new HashSet<Rating>();
-		ratings.addAll(f.getRatingList());
+		this.vote_avg = f.getVoteAvg();
+
 	}
 
 	

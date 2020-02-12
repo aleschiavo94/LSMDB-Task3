@@ -25,9 +25,9 @@
                               <Font name="System Bold" size="14.0" />
                            </font>
                         </Text>
-                        <TableView fx:id="film_follower" layoutX="14.0" layoutY="135.0" onMouseClicked="#showDetails" prefHeight="214.0" prefWidth="130.0">
+                        <TableView fx:id="following_film_table" layoutX="14.0" layoutY="135.0" onMouseClicked="#showDetails" prefHeight="214.0" prefWidth="130.0">
                            <columns>
-                              <TableColumn fx:id="title_column1" editable="false" prefWidth="130.0" text="Title" />
+                              <TableColumn fx:id="following_film_column" editable="false" prefWidth="130.0" text="Title" />
                            </columns>
                         </TableView>
                         <Text fill="WHITE" layoutX="192.0" layoutY="117.0" strokeType="OUTSIDE" strokeWidth="0.0" text="By genre">

@@ -81,14 +81,20 @@ public class FXMLUserController implements Initializable {
 	@FXML private TableView<User> all_user_table;
 	@FXML private TableColumn<User, String> all_user_column;
 		private ObservableList<User> all_user;
-		
+	
+	//for most rented films
 	@FXML private TableView<Film> most_rent_film;
 	@FXML private TableColumn<Film, String> most_rent_column;
 		private ObservableList<Film> top_rent_film;
 		
-		@FXML private TableView<Film> top_rate_film;
-		@FXML private TableColumn<Film, String> top_rate_column;
-			private ObservableList<Film> top_rate_list;
+	//for most rated films	
+	@FXML private TableView<Film> top_rate_film;
+	@FXML private TableColumn<Film, String> top_rate_column;
+		private ObservableList<Film> top_rate_list;
+		
+	@FXML private TableView<Film> following_film_table;
+	@FXML private TableColumn<Film, String> following_film_column;
+		private ObservableList<Film> following_film;
 	
 	public void initialize(URL url, ResourceBundle rb) {
        //ininizializing of the table 
@@ -138,6 +144,12 @@ public class FXMLUserController implements Initializable {
 		top_rate_list = FXCollections.observableArrayList();
 		top_rate_list.addAll(UserEntityManager.getTopRatedFilms());
 		top_rate_film.setItems(top_rate_list);
+		
+		
+		following_film_column.setCellValueFactory(new PropertyValueFactory<Film, String>("title"));
+		following_film = FXCollections.observableArrayList();
+		following_film.addAll(UserEntityManager.getFollowingFilms());
+		following_film_table.setItems(following_film);
     }  
 	
 	
@@ -448,4 +460,7 @@ public class FXMLUserController implements Initializable {
 	            e.printStackTrace();
 	        }  
 	}
+	
+	
+	
 }
