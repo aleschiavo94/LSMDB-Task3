@@ -420,7 +420,7 @@ public class FXMLUserController implements Initializable {
 			current_user.setCredit(current_user.getCredit() + dep);
 		
 		
-		//UserEntityManager.updateUserInfo(current_user);
+		UserEntityManager.updateUserInfo(current_user);
 		initUserInfo();
 
 	}

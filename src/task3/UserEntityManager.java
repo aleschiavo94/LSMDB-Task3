@@ -163,6 +163,7 @@ public class UserEntityManager {
 	    	
 	    }
 	    
+	   
 	    
 	    /*
 	     * USER CONTROLLER FUNCTIONS
@@ -703,6 +704,38 @@ public class UserEntityManager {
 	    	return;
 	    }
 	    
+	    
+    	public static void updateUserInfo(User user) {
+	    	
+	    	try(Session session = driver.session()){
+	    		session.writeTransaction(new TransactionWork<Void>() {
+	    			@Override
+	    			public Void execute(Transaction tx) {
+	    				/*deleteUserMovies(tx, user);
+	    				deleteUserRatings(tx, user);
+	    				deleteUserFollow(tx, user);
+	    				deleteUser(tx, user);*/
+	    				updateUserNode(tx, user);
+	    				return null;
+	    			}
+	    		});
+	    	}
+	    	
+	    	return;
+	    } 
+    	 private static void updateUserNode(Transaction tx, User u) {
+ 	    	Map<String, Object> params = new HashMap<>();
+     		params.put("username", u.getUsername());
+     		params.put("password", u.getPassword());
+     		params.put("credit", u.getCredit());
+     		params.put("email", u.getEmail());
+     		//params.put("credit", u.);
+     		
+ 	    	tx.run("MATCH (n:Users ) WHERE n.username = $username " +
+ 	    			"SET n.email=$email, n.credit=$credit, n.password=$password", params);
+ 	    	
+ 	    	return;
+ 	    }
 	    /*private static void deleteUserMovies(Transaction tx, User u) {
 	    	Map<String, Object> params = new HashMap<>();
     		params.put("username", u.getUsername());
