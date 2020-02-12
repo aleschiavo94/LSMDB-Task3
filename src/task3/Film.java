@@ -22,7 +22,7 @@ public class Film {
 	private final String production_country;
 	private final String language;
 	private final int runtime;
-	private final int vote_count;
+	private int vote_count;
 	private double vote_avg;
 	
 	
@@ -156,6 +156,9 @@ public class Film {
 	}
 	public int getVoteCount() {
 		return this.vote_count;
+	}
+	public void setVoteCount(int count) {
+		this.vote_count = count;
 	}
 	public void setVoteAvg(double vote) {
 		this.vote_avg = vote;

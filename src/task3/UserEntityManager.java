@@ -224,66 +224,6 @@ public class UserEntityManager {
 	    	return result;
 	    }
 	    
-	    public static int getVote(Film f) {
-	    	List<Record> record;
-
-			int vote = 0;
-			int i = 0;
-	    	try(Session session = driver.session()){
-	    		
-	    		record = session.readTransaction(new TransactionWork<List<Record>>() {
-	    			@Override
-	    			public List<Record> execute(Transaction tx) {
-	    				List<Record> res = getAverageVote(tx, f);
-	    				
-						return res;
-	    			}
-	    		});
-	    		for(Record rec: record) {
-	    			vote += rec.get("vote").asInt();
-	    			i++;
-	    		}
-	    	}
-	    	if(i == 0)
-	    		return 0;
-	    	else {
-		    	double avg = vote/i;
-		    	return (int) Math.round(avg);
-	    	}
-	    }
-	    
-	    public static int getCount(Film f) {
-	    	List<Record> record;
-
-			int vote = 0;
-			int i = 0;
-	    	try(Session session = driver.session()){
-	    		
-	    		record = session.readTransaction(new TransactionWork<List<Record>>() {
-	    			@Override
-	    			public List<Record> execute(Transaction tx) {
-	    				List<Record> res = getAverageVote(tx, f);
-	    				
-						return res;
-	    			}
-	    		});
-	    		for(Record rec: record) {
-	    			i++;
-	    		}
-	    	}
-	    	return i;
-	    }
-	    
-	    private static List<Record> getAverageVote(Transaction tx, Film f) {
-	    	Map<String, Object> params = new HashMap<>();
-	    	params.put("title", f.getTitle());
-	    	
-	    	List<Record> result = tx.run("MATCH (u:Users)-[r:RATES]-(m:Movies) "
-	    			+ "WHERE m.title=$title RETURN r.vote as vote", params).list();
-	    	
-	    	return result;
-	    }
-	    
 	    //search if the user has already rated the film
 	    public static boolean searchRating(User user, Film f) {
 	    	boolean found;
@@ -311,7 +251,7 @@ public class UserEntityManager {
     		params.put("username", username);
     		params.put("title", title);
     		
-    		StatementResult result = tx.run("MATCH(ee:Users) -[r:RATES]-(ff:Movies) "
+    		StatementResult result = tx.run("MATCH(ee:Users)-[r:RATES]->(ff:Movies) "
     				+ "where ee.username=$username and ff.title=$title "
     				+ "return r.vote", params);
 	    	
@@ -353,7 +293,8 @@ public class UserEntityManager {
 	    }
 	    
 	    //updating rate's info for the movie
-	    public static void updateMovieRate(Film f, int rate) {
+	    public static List<String> updateMovieRate(Film f, int rate) {
+	    	List<String> res = new ArrayList<String>();
 	    	int[]count= {0};
 	    	int[] avg= {0};
 	    	
@@ -383,12 +324,15 @@ public class UserEntityManager {
 	    		});
 	    	}
 	    	
-	    	count[0]=count[0]+1;
-			avg[0]=((avg[0]+rate)/2);
+	    	count[0] = count[0]+1;
+			avg[0] = ((avg[0]+rate)/count[0]);
 			
-			String average=Integer.toString(avg[0]);
+			res.add(Integer.toString(count[0]));
+			res.add(Double.toString(avg[0]));
+			
+			
+			String average = Integer.toString(avg[0]);
 	
-			
 	    	try(Session session = driver.session()){
 	    		session.writeTransaction(new TransactionWork<Void>() {
 	    			@Override
@@ -400,15 +344,15 @@ public class UserEntityManager {
 	    		});
 	    	}
 	    	
-	    	return;
+	    	return res;
 	    } 
 	    
 	    private static Record matchMovieCount(Transaction tx, String title) {
 	    	Map<String, Object> params = new HashMap<>();
     		params.put("title", title);
     		
-	    	StatementResult res = tx.run("MATCH(ff:Movies)\r\n" + 
-	    			"WHERE  ff.title=\"Toy Story\"\r\n" + 
+	    	StatementResult res = tx.run("MATCH(ff:Movies) " + 
+	    			"WHERE ff.title = $title " + 
 	    			"RETURN ff.vote_count as vote_count", params);
 	    	
 	    	return res.single();
@@ -418,8 +362,8 @@ public class UserEntityManager {
 	    	Map<String, Object> params = new HashMap<>();
     		params.put("title", title);
     		
-	    	StatementResult res = tx.run("MATCH(ff:Movies)\r\n" + 
-	    			"WHERE  ff.title=\"Toy Story\"\r\n" + 
+	    	StatementResult res = tx.run("MATCH(ff:Movies) " + 
+	    			"WHERE ff.title=$title " + 
 	    			"RETURN ff.vote_average as vote_average", params);
 	    	
 	    	return res.single();
@@ -429,10 +373,10 @@ public class UserEntityManager {
 	    	Map<String, Object> params = new HashMap<>();
     		params.put("title", title);
     		params.put("avg", avg);
-    		params.put("count", count);
+    		params.put("count", Integer.toString(count));
     		
-	    	tx.run("MATCH(ff:Movies)\r\n" + 
-	    			"WHERE  ff.title=$title\r\n" + 
+	    	tx.run("MATCH(ff:Movies) " + 
+	    			"WHERE  ff.title=$title " + 
 	    			"SET ff.vote_count=$count , ff.vote_average=$avg", params);
 	    	
 	    	return null;
@@ -795,12 +739,12 @@ public class UserEntityManager {
 					int price = res.get("weeklyPrice").asInt();
 					String prod = res.get("production_company").asString();
 					int budget = res.get("budget").asInt();
+					System.out.println(res.get("vote_avg"));
 					double vote_avg = Double.parseDouble(res.get("vote_avg").asString());
 		    		films.add(new Film(id, title, genre, plot, year, price, prod, budget, vote_avg));
 		    		
 		    	} 
 			}
-
 	    	return films;
 	    } 
 	    
@@ -851,7 +795,6 @@ public class UserEntityManager {
 	    } 
 	    
 	    private static List<Record> followingFilms(Transaction tx){
-    		
     		List<Record> result=tx.run("MATCH (u:Users{username: 'adam'})<-[t:FOLLOWS]-(u2:Users)-[r:RENTS]-(movie)"+
     				"return distinct movie.id as id, movie.title as title,"+
     				"movie.production_companies as production_company, movie.budget as budget,"+

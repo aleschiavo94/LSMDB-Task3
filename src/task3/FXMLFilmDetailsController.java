@@ -16,12 +16,14 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
+import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 
 public class FXMLFilmDetailsController implements Initializable{
@@ -47,18 +49,15 @@ public class FXMLFilmDetailsController implements Initializable{
 	@FXML private Label vote_label;
 	
 	//objects for rating the film
-	@FXML private ToggleGroup group;
-	@FXML private RadioButton radiobutton1;
-	@FXML private RadioButton radiobutton2;
-	@FXML private RadioButton radiobutton3;
-	@FXML private RadioButton radiobutton4;
-	@FXML private RadioButton radiobutton5;
+	@FXML private ComboBox<String> vote_comboBox;
+		private ObservableList<String> vote_list;
 	@FXML private Button submit_button;
 	
 	@FXML private Label list_label;
 	@FXML private ListView<String> rate_list;
 		  private ObservableList<String> vote;
 	
+	@FXML private Rectangle rectangle;
 
 	//inizializing with the current film's informations
 	public void setInfo(Film f, List<Film> list, User u) {
@@ -76,26 +75,15 @@ public class FXMLFilmDetailsController implements Initializable{
 		revenue_label.setText(Integer.toString(f.getRevenue()));
 		country_label.setText(f.getProductionCountry());
 		language_label.setText(f.getLanguage());
-		runtime_label.setText(Integer.toString(f.getRuntime()));
+		runtime_label.setText(Integer.toString(f.getRuntime()) + " minutes");
 		company_label.setText(f.getProductionCompany());
-		double rating = UserEntityManager.getVote(current_film);
-		int vote_count = UserEntityManager.getCount(current_film);
-		rating_label.setText(Double.toString(rating)+"/5 out of " + vote_count + " votes");
+		rating_label.setText(f.getVoteAvg()+"/10 out of " + f.getVoteCount() + " votes");
 		//director_label.setText(f.getDirector());
 		plot_area.setText(f.getPlot());
 		
-		group = new ToggleGroup();
-		
-
 		if(!current_user.getUsername().equals("admin")) {
 			rate_list.setVisible(false);
 			list_label.setVisible(false);
-			
-			radiobutton1.setToggleGroup(group);
-			radiobutton2.setToggleGroup(group);
-			radiobutton3.setToggleGroup(group);
-			radiobutton4.setToggleGroup(group);
-			radiobutton5.setToggleGroup(group);
 			
 			//if the current user has already rated the current film, the button is disabled
 			boolean rated = UserEntityManager.searchRating(current_user, current_film);
@@ -104,12 +92,8 @@ public class FXMLFilmDetailsController implements Initializable{
 				submit_button.setDisable(true);
 			}
 		}else {
-			radiobutton1.setVisible(false);
-			radiobutton2.setVisible(false);
-			radiobutton3.setVisible(false);
-			radiobutton4.setVisible(false);
-			radiobutton5.setVisible(false);
-			
+			rectangle.setVisible(false);
+			vote_comboBox.setVisible(false);
 			submit_button.setVisible(false);
 			
 			vote_label.setVisible(false);
@@ -129,21 +113,23 @@ public class FXMLFilmDetailsController implements Initializable{
 	}
 	
 	
-	//getting the rate from the radiobutton
+	//getting the rate from the comboBox
 	public void getRadioButtonVote() {
 			Rating r;
-
-		
-			//getting the value from the selected radiobutton 
-			RadioButton selected = (RadioButton)group.getSelectedToggle();
-			Integer value = Integer.parseInt(selected.getText());
+			
+			//getting the value from the comboBoz
+			String selected = vote_comboBox.getSelectionModel().getSelectedItem().toString();
+			Integer value = Integer.parseInt(selected);
 			
 			//adding the new rate
 			r = new Rating(current_user, current_film, LocalDate.now(), value);
 		
 			UserEntityManager.insertRating(r);
 			
-			UserEntityManager.updateMovieRate(current_film, value);
+			List<String> avg_count = new ArrayList<String>();
+//			avg_count.addAll(
+					UserEntityManager.updateMovieRate(current_film, value); //);
+			
 			
 			//updating film's informations
 //			current_film = UserEntityManager.refreshFilm(current_film);
@@ -151,7 +137,7 @@ public class FXMLFilmDetailsController implements Initializable{
 			//calculating the new mean rate and changing the value in the label
 			//int vote_count = UserEntityManager.getCount(current_film);
 			//Integer mean = UserEntityManager.getVote(current_film);
-			rating_label.setText(current_film.getVoteAvg()+"/5 out of " + current_film.getVoteCount() + " votes");
+			rating_label.setText(current_film.getVoteAvg()+"/10 out of " + current_film.getVoteCount() + " votes");
 			
 			//disabling the button to not rate again
 			submit_button.setDisable(true);
@@ -160,7 +146,9 @@ public class FXMLFilmDetailsController implements Initializable{
 	}
 	
 	public void initialize(URL url, ResourceBundle rb) {
-		
+		vote_list = FXCollections.observableArrayList("1", 
+				"2", "3", "4", "5", "6", "7", "8", "9", "10");
+		vote_comboBox.setItems(vote_list);
     }
 	
 	  
