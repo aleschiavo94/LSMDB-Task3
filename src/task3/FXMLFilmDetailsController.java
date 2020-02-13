@@ -78,7 +78,6 @@ public class FXMLFilmDetailsController implements Initializable{
 		runtime_label.setText(Integer.toString(f.getRuntime()) + " minutes");
 		company_label.setText(f.getProductionCompany());
 		rating_label.setText(f.getVoteAvg()+"/10 out of " + f.getVoteCount() + " votes");
-		//director_label.setText(f.getDirector());
 		plot_area.setText(f.getPlot());
 		
 		if(!current_user.getUsername().equals("admin")) {
@@ -102,13 +101,12 @@ public class FXMLFilmDetailsController implements Initializable{
 			list_label.setVisible(true);
 			
 			ObservableList<String> vote = FXCollections.observableArrayList();
-//			for (Iterator<Rating> it = f.getRatingList().iterator(); it.hasNext(); ) {
-//	        	Rating rate = it.next();
-//	        	
-//	        	String s = rate.getUser().getUsername()+", "+rate.getVote();
-//	        	vote.add(s);
-//			}
-//			rate_list.setItems(vote);
+			List<String> listVote = new ArrayList<String>(UserEntityManager.getAllRatingByFilm(current_film));
+			
+			for(int i = 0; i < listVote.size(); i++) {
+				vote.add(listVote.get(i));
+			}
+			rate_list.setItems(vote);
 		}
 	}
 	
@@ -119,7 +117,7 @@ public class FXMLFilmDetailsController implements Initializable{
 			
 			//getting the value from the comboBoz
 			String selected = vote_comboBox.getSelectionModel().getSelectedItem().toString();
-			Integer value = Integer.parseInt(selected);
+			double value = Double.parseDouble(selected);
 			
 			//adding the new rate
 			r = new Rating(current_user, current_film, LocalDate.now(), value);
@@ -127,16 +125,11 @@ public class FXMLFilmDetailsController implements Initializable{
 			UserEntityManager.insertRating(r);
 			
 			List<String> avg_count = new ArrayList<String>();
-//			avg_count.addAll(
-					UserEntityManager.updateMovieRate(current_film, value); //);
+			avg_count.addAll(UserEntityManager.updateMovieRate(current_film, value));
 			
+			current_film.setVoteAvg(Double.parseDouble(avg_count.get(1)));
+			current_film.setVoteCount(Integer.parseInt(avg_count.get(0)));
 			
-			//updating film's informations
-//			current_film = UserEntityManager.refreshFilm(current_film);
-			
-			//calculating the new mean rate and changing the value in the label
-			//int vote_count = UserEntityManager.getCount(current_film);
-			//Integer mean = UserEntityManager.getVote(current_film);
 			rating_label.setText(current_film.getVoteAvg()+"/10 out of " + current_film.getVoteCount() + " votes");
 			
 			//disabling the button to not rate again

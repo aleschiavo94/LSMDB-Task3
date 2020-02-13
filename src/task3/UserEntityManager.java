@@ -30,6 +30,7 @@ public class UserEntityManager {
 
 	    // Driver objects are thread-safe and are typically made available application-wide.
 	    private static Driver driver;
+	    private static int count = 0;
 	    //private static UserEntityManager userEntityManager;
 	    
 	    public static void start(){	
@@ -259,6 +260,44 @@ public class UserEntityManager {
 	    	return result;
 	    }
 	    
+	    public static List<String> getAllRatingByFilm(Film f) {
+	    	List<String> list = new ArrayList<String>();
+	    	List<Record> record;
+	    	
+	    	try(Session session = driver.session()){
+	    		record = session.readTransaction(new TransactionWork<List<Record>>() {
+	    			@Override
+	    			public List<Record> execute(Transaction tx) {
+	    				List<Record> res = matchRatingByFilm(tx, f.getTitle());
+	    				
+	    				return res;
+	    			}
+	    		});
+	    		
+	    		for(Record rec: record) {    				
+    				int vote = rec.get("vote").asInt();
+    				String username = rec.get("username").asString();
+    				
+    				String votes = username +", "+ vote;
+    				
+    			    list.add(votes);
+    				
+	    		}
+	    	}
+	    	return list;
+	    }
+	    
+	    private static List<Record> matchRatingByFilm(Transaction tx, String title) {
+	    	Map<String, Object> params = new HashMap<>();
+    		params.put("title", title);
+    		
+    		List<Record> result = tx.run("MATCH (u:Users)-[r:RATES]->(m:Movies) "
+    				+ "where m.title=$title "
+    				+ "return r.vote as vote, u.username as username", params).list();
+	    	
+	    	return result;
+	    }
+	    
 	    
 	    //inserting a new rating for the user
 	    public static void insertRating(Rating r) {
@@ -279,7 +318,7 @@ public class UserEntityManager {
 	    	return;
 	    } 
 	    
-	    private static void createRating(Transaction tx, String username, String title, int vote, int ts) {
+	    private static void createRating(Transaction tx, String username, String title, double vote, int ts) {
 	    	Map<String, Object> params = new HashMap<>();
     		params.put("username", username);
     		params.put("title", title);
@@ -294,13 +333,14 @@ public class UserEntityManager {
 	    }
 	    
 	    //updating rate's info for the movie
-	    public static List<String> updateMovieRate(Film f, int rate) {
+	    public static List<String> updateMovieRate(Film f, double rate) {
 	    	List<String> res = new ArrayList<String>();
-	    	int[]count= {0};
-	    	int[] avg= {0};
+	    	int c = 0;
 	    	
+	    	double avg= 0.0;
+	    		    	
 	    	try(Session session = driver.session()){
-	    		count[0] = session.readTransaction(new TransactionWork<Integer>() {
+	    		c = session.readTransaction(new TransactionWork<Integer>() {
 	    			@Override
 	    			public Integer execute(Transaction tx) {
 	    				int match;
@@ -312,39 +352,37 @@ public class UserEntityManager {
 	    			}
 	    		});
 	    		
-	    		avg[0] = session.readTransaction(new TransactionWork<Integer>() {
+	    		avg = session.readTransaction(new TransactionWork<Double>() {
 	    			@Override
-	    			public Integer execute(Transaction tx) {
+	    			public Double execute(Transaction tx) {
 	    				String match;
 	    				Record result = matchMovieAvg(tx, f.getTitle());
 	    				
 	    				match = result.get("vote_average").asString();
 	    				
-	    				return Integer.parseInt(match);
+	    				return Double.parseDouble(match);
 	    			}
 	    		});
 	    	}
 	    	
-	    	count[0] = count[0]+1;
-			avg[0] = ((avg[0]+rate)/count[0]);
+	    	int old_count = c;
+	    	count = c+1;
+			avg = Math.round((((avg*old_count)+rate)/count)*100.0)/100.0;
+			String average = Double.toString(avg);
 			
-			res.add(Integer.toString(count[0]));
-			res.add(Double.toString(avg[0]));
-			
-			
-			String average = Integer.toString(avg[0]);
-	
-	    	try(Session session = driver.session()){
+		   	try(Session session = driver.session()){
 	    		session.writeTransaction(new TransactionWork<Void>() {
 	    			@Override
 	    			public Void execute(Transaction tx) {
 	    				
-	    				updateMovieRating(tx, f.getTitle(), average, count[0]);
+	    				updateMovieRating(tx, f.getTitle(), average, count);
 	    				return null;
 	    			}
 	    		});
 	    	}
-	    	
+		   	res.add(Integer.toString(count));
+			res.add(Double.toString(avg));
+							   			   	
 	    	return res;
 	    } 
 	    
@@ -374,7 +412,7 @@ public class UserEntityManager {
 	    	Map<String, Object> params = new HashMap<>();
     		params.put("title", title);
     		params.put("avg", avg);
-    		params.put("count", Integer.toString(count));
+    		params.put("count", count);
     		
 	    	tx.run("MATCH(ff:Movies) " + 
 	    			"WHERE  ff.title=$title " + 
@@ -782,7 +820,6 @@ public class UserEntityManager {
 					int price = res.get("weeklyPrice").asInt();
 					String prod = res.get("production_company").asString();
 					int budget = res.get("budget").asInt();
-					System.out.println(res.get("vote_avg"));
 					double vote_avg = Double.parseDouble(res.get("vote_avg").asString());
 		    		films.add(new Film(id, title, genre, plot, year, price, prod, budget, vote_avg));
 		    		

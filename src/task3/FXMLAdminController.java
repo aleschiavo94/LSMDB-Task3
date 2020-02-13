@@ -43,7 +43,6 @@ public class FXMLAdminController implements Initializable{
 			  
 		//objects for visualizing all the rentals
 		@FXML private TableView<Rental> rental_table;
-		@FXML private TableColumn<Rental, Integer> rental_id_column;
 		@FXML private TableColumn<Rental, Integer> rental_price_column;
 		@FXML private TableColumn<Rental, LocalDate> rental_startDate_column;
 		@FXML private TableColumn<Rental, LocalDate> rental_endDate_column;
@@ -311,7 +310,6 @@ public class FXMLAdminController implements Initializable{
 		film_table.setItems(film_in_db);
 		
 		//initializing the rent table
-		rental_id_column.setCellValueFactory(new PropertyValueFactory<Rental, Integer>("idRental"));
 		rental_startDate_column.setCellValueFactory(new PropertyValueFactory<Rental, LocalDate>("startDate"));
 		rental_endDate_column.setCellValueFactory(new PropertyValueFactory<Rental, LocalDate>("endDate"));
 		rental_price_column.setCellValueFactory(new PropertyValueFactory<Rental, Integer>("totalPrice"));

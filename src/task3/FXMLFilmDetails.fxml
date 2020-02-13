@@ -15,7 +15,7 @@
    <content>
       <Pane prefHeight="507.0" prefWidth="694.0" style="-fx-background-color: #1C0001;">
          <children>
-            <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#1f93ff00" height="56.0" layoutX="346.0" layoutY="66.0" stroke="WHITE" strokeType="INSIDE" strokeWidth="3.0" width="318.0" />
+            <Rectangle fx:id="rectangle" arcHeight="5.0" arcWidth="5.0" fill="#1f93ff00" height="56.0" layoutX="346.0" layoutY="66.0" stroke="WHITE" strokeType="INSIDE" strokeWidth="3.0" width="318.0" />
             <Label fx:id="title_label" layoutX="45.0" layoutY="27.0" text="Titolo" textFill="WHITE">
                <font>
                   <Font size="24.0" />
@@ -103,8 +103,8 @@
                   <Font size="14.0" />
                </font>
             </Button>
-            <ListView fx:id="rate_list" layoutX="536.0" layoutY="189.0" prefHeight="145.0" prefWidth="130.0" />
-            <Label fx:id="list_label" layoutX="395.0" layoutY="189.0" prefHeight="27.0" prefWidth="134.0" text="List of ratings:" textFill="WHITE">
+            <ListView fx:id="rate_list" layoutX="531.0" layoutY="71.0" prefHeight="145.0" prefWidth="130.0" />
+            <Label fx:id="list_label" layoutX="378.0" layoutY="80.0" prefHeight="27.0" prefWidth="134.0" text="List of ratings:" textFill="WHITE">
                <font>
                   <Font size="18.0" />
                </font>
@@ -129,7 +129,7 @@
                   <Font size="18.0" />
                </font>
             </Label>
-            <ComboBox fx:id="vote_comboBox" layoutX="421.0" layoutY="81.0" prefWidth="150.0" style="-fx-background-color: white;" />
+            <ComboBox fx:id="vote_comboBox" layoutX="421.0" layoutY="81.0" prefWidth="150.0" promptText="Choose one.." style="-fx-background-color: white;" />
          </children>
       </Pane>
    </content>

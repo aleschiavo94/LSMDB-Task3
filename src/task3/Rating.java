@@ -6,12 +6,12 @@ import java.time.LocalDate;
 public class Rating {
 	private final int idRating;
 	private final LocalDate insertDate;
-	private final int vote;
+	private final double vote;
     private Film film;
     private User user;
     
     
-		public Rating(int idR, User u, Film f, LocalDate insDate, int vote) {
+		public Rating(int idR, User u, Film f, LocalDate insDate, double vote) {
 			this.idRating = idR;
 			this.user = new User(u);
 			this.film = new Film(f);
@@ -19,7 +19,7 @@ public class Rating {
 			this.vote = vote;
 		}
 	
-		public Rating(User u, Film f, LocalDate insDate, int vote) {	
+		public Rating(User u, Film f, LocalDate insDate, double vote) {	
 			this.idRating = 0; // null value, used when inserting a new vote
 			this.user = new User(u);
 			this.film = new Film(f);
@@ -39,7 +39,7 @@ public class Rating {
 		public User getUser() {
 			return this.user;
 		}
-		public int getVote() {
+		public double getVote() {
 			return this.vote;
 		}
 		
