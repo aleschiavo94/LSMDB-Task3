@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.DatePicker?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.TextField?>
@@ -9,9 +10,9 @@
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.text.Font?>
 
-<Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="500.0" style="-fx-background-color: #1C0001;" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="task3.FXMLFilmInsertController">
+<Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="450.0" prefWidth="700.0" style="-fx-background-color: #1C0001;" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="task3.FXMLFilmInsertController">
    <children>
-      <Label layoutX="74.0" layoutY="20.0" prefHeight="39.0" prefWidth="126.0" text="Insert a Film" textFill="#db6063">
+      <Label layoutX="294.0" layoutY="14.0" prefHeight="39.0" prefWidth="126.0" text="Insert a Film" textFill="#db6063">
          <font>
             <Font size="18.0" />
          </font>
@@ -20,32 +21,54 @@
          <font>
             <Font size="14.0" />
          </font></TextField>
-      <TextField fx:id="inserted_genre" layoutX="34.0" layoutY="114.0" promptText="Genre">
+      <TextField fx:id="inserted_genre" layoutX="245.0" layoutY="72.0" promptText="Genre">
          <font>
             <Font size="14.0" />
          </font></TextField>
-      <TextField fx:id="inserted_director" layoutX="34.0" layoutY="156.0" promptText="Director">
+      <TextField fx:id="inserted_production_company" layoutX="34.0" layoutY="123.0" promptText="Production company">
          <font>
             <Font size="14.0" />
          </font></TextField>
-      <TextField fx:id="inserted_pub_year" layoutX="35.0" layoutY="199.0" promptText="Release Year">
+      <DatePicker fx:id="inserted_pub_year" editable="false" layoutX="246.0" layoutY="121.0" prefHeight="30.0" prefWidth="174.0" promptText="Release date" />
+      <TextField fx:id="inserted_weekly_price" layoutX="34.0" layoutY="171.0" promptText="Weekly Price">
          <font>
             <Font size="14.0" />
          </font></TextField>
-      <TextField fx:id="inserted_weekly_price" layoutX="35.0" layoutY="242.0" promptText="Weekly Price">
+      <TextField fx:id="inserted_budget" layoutX="245.0" layoutY="171.0" promptText="Budget">
          <font>
             <Font size="14.0" />
-         </font></TextField>
-      <TextArea fx:id="inserted_plot" layoutX="256.0" layoutY="72.0" prefHeight="200.0" prefWidth="200.0" promptText="Short plot of the film...">
+         </font>
+      </TextField>
+      <TextField fx:id="inserted_revenue" layoutX="34.0" layoutY="220.0" promptText="Revenue">
+         <font>
+            <Font size="14.0" />
+         </font>
+      </TextField>
+      <TextField fx:id="inserted_production_country" layoutX="245.0" layoutY="220.0" promptText="Production country">
+         <font>
+            <Font size="14.0" />
+         </font>
+      </TextField>
+      <TextField fx:id="inserted_language" layoutX="35.0" layoutY="270.0" promptText="Language">
+         <font>
+            <Font size="14.0" />
+         </font>
+      </TextField>
+      <TextField fx:id="inserted_runtime" layoutX="245.0" layoutY="270.0" promptText="Runtime">
+         <font>
+            <Font size="14.0" />
+         </font>
+      </TextField>
+      <TextArea fx:id="inserted_plot" layoutX="462.0" layoutY="71.0" prefHeight="229.0" prefWidth="200.0" promptText="Short plot of the film...">
          <font>
             <Font size="14.0" />
          </font></TextArea>
-      <Button layoutX="316.0" layoutY="308.0" mnemonicParsing="false" onMouseClicked="#insertNewFilm" prefHeight="39.0" prefWidth="81.0" text="Insert">
+      <Button layoutX="317.0" layoutY="359.0" mnemonicParsing="false" onMouseClicked="#insertNewFilm" prefHeight="39.0" prefWidth="81.0" text="Insert">
          <font>
             <Font size="18.0" />
          </font>
       </Button>
-      <ImageView fitHeight="106.0" fitWidth="126.0" layoutX="58.0" layoutY="280.0" pickOnBounds="true" preserveRatio="true">
+      <ImageView fitHeight="106.0" fitWidth="126.0" layoutX="69.0" layoutY="326.0" pickOnBounds="true" preserveRatio="true">
          <image>
             <Image url="@../cinema.jpg" />
          </image>

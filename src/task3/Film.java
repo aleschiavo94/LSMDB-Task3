@@ -10,7 +10,7 @@ import javafx.beans.property.*;
 
 
 public class Film {
-	private final int idFilm;
+	//private final int idFilm;
 	private final String title;
 	private final String genre;
 	private final String plot;
@@ -27,7 +27,7 @@ public class Film {
 	
 	
 	public Film() {
-		this.idFilm=0;
+		//this.idFilm=0;
 		this.production_company = "";
 		this.genre = null;
 		this.title = "";
@@ -43,9 +43,10 @@ public class Film {
 		this.vote_avg=0.0;
 	}
 	
+	/*
 	public Film(int idFilm, String title, String genre, String plot, String releaseYear, int weeklyPrice, String production_company,int budget) {
 
-		this.idFilm = idFilm;
+		//this.idFilm = idFilm;
         this.title = title;
 		this.genre = genre;
 		this.plot = plot;
@@ -59,11 +60,11 @@ public class Film {
 		this.runtime = 0;
 		this.vote_count = 0;
 
-	}
+	}*/
 	
 	public Film( String title, String genre, String plot, String releaseYear, int weeklyPrice, String production_company, int budget) {
 
-		this.idFilm = 0;
+		//this.idFilm = 0;
         this.title = title;
 		this.genre = genre;
 		this.plot = plot;
@@ -78,9 +79,9 @@ public class Film {
 		this.vote_count = 0;
 	}
 	
-	public Film(int idFilm, String title, String genre, String plot, String releaseYear, int weeklyPrice, String production_company,int budget, double vote_avg) {
+	public Film(/*int idFilm,*/ String title, String genre, String plot, String releaseYear, int weeklyPrice, String production_company,int budget, double vote_avg) {
 
-		this.idFilm = idFilm;
+		//this.idFilm = idFilm;
         this.title = title;
 		this.genre = genre;
 		this.plot = plot;
@@ -97,9 +98,9 @@ public class Film {
 	}
 	
 
-	public Film(int idFilm, String title, String genre, String plot, String releaseYear, int weeklyPrice, String production_company,int budget, int revenue,String production_country, String language, int runtime, int vote_count, double vote_avg) {
+	public Film(/*int idFilm,*/ String title, String genre, String plot, String releaseYear, int weeklyPrice, String production_company,int budget, int revenue,String production_country, String language, int runtime, int vote_count, double vote_avg) {
 
-		this.idFilm = idFilm;
+		//this.idFilm = idFilm;
         this.title = title;
 		this.genre = genre;
 		this.plot = plot;
@@ -113,11 +114,11 @@ public class Film {
 		this.runtime = runtime;
 		this.vote_count = vote_count;
 		this.vote_avg = vote_avg;
-	}
-	
+	} 
+	/*
 	public int getIdFilm(){
 		return this.idFilm;
-	}
+	}*/
 	public String getTitle(){
 		return this.title;
 	}
@@ -166,7 +167,7 @@ public class Film {
 
 	
 	public Film(Film f){
-		this.idFilm = f.getIdFilm();
+		//this.idFilm = f.getIdFilm();
         this.title = f.getTitle();
 		this.genre = f.getGenre();
 		this.plot = f.getPlot();

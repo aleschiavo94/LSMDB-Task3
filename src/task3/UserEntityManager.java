@@ -181,12 +181,12 @@ public class UserEntityManager {
 	    				List<Film> films = new ArrayList<>();
 	    				StatementResult res = matchFilms(tx);
 	    				//System.out.println(res.list().size());
-	    				int i  = 0;
+	    				//int i  = 0;
 	    				Record rec;
 	    				while(res.hasNext()) {
 	    					rec = res.next();
 	    					
-	    		    		int id = rec.get("id").asInt();
+	    		    		//int id = rec.get("id").asInt();
 	    					String title = rec.get("title").asString();
 	    					String genre = rec.get("genre").asString();
 	    					String plot = rec.get("plot").asString();
@@ -201,7 +201,7 @@ public class UserEntityManager {
 	    					int vote_count = rec.get("vote_count").asInt();
 	    					double vote_avg = Double.parseDouble(rec.get("vote_avg").asString());
 	    					
-	    		    		films.add(new Film(id, title, genre, plot, year, price, production_companies, 
+	    		    		films.add(new Film(/*id,*/ title, genre, plot, year, price, production_companies, 
 	    		    				budget, revenue, production_country, language, runtime, vote_count, vote_avg));
 	    		    		
 	    		    	}
@@ -768,7 +768,7 @@ public class UserEntityManager {
 	    		});
 	    		
 	    		for(Record res: list) {
-	    	  		int id = res.get("id").asInt();
+	    	  		//int id = res.get("id").asInt();
 					String title = res.get("title").asString();
 					String genre = res.get("genre").asString();
 					String plot = res.get("plot").asString();
@@ -777,7 +777,7 @@ public class UserEntityManager {
 					String prod = res.get("production_company").asString();
 					int budget = res.get("budget").asInt();
 					double vote_avg = Double.parseDouble(res.get("vote_avg").asString());
-		    		films.add(new Film(id, title, genre, plot, year, price, prod, budget, vote_avg));
+		    		films.add(new Film(/*id,*/ title, genre, plot, year, price, prod, budget, vote_avg));
 		    		
 		    	} 
 			}
@@ -812,7 +812,7 @@ public class UserEntityManager {
 	    		});
 	    		
 	    		for(Record res: list) {
-	    	  		int id = res.get("id").asInt();
+	    	  		//int id = res.get("id").asInt();
 					String title = res.get("title").asString();
 					String genre = res.get("genre").asString();
 					String plot = res.get("plot").asString();
@@ -821,7 +821,7 @@ public class UserEntityManager {
 					String prod = res.get("production_company").asString();
 					int budget = res.get("budget").asInt();
 					double vote_avg = Double.parseDouble(res.get("vote_avg").asString());
-		    		films.add(new Film(id, title, genre, plot, year, price, prod, budget, vote_avg));
+		    		films.add(new Film(/*id,*/ title, genre, plot, year, price, prod, budget, vote_avg));
 		    		
 		    	} 
 			}
@@ -857,7 +857,7 @@ public class UserEntityManager {
 	    		});
 	    		
 	    		for(Record res: list) {
-	    	  		int id = res.get("id").asInt();
+	    	  		//int id = res.get("id").asInt();
 					String title = res.get("title").asString();
 					String genre = res.get("genre").asString();
 					String plot = res.get("plot").asString();
@@ -866,7 +866,7 @@ public class UserEntityManager {
 					String prod = res.get("production_company").asString();
 					int budget = res.get("budget").asInt();
 					double vote_avg = Double.parseDouble(res.get("vote_avg").asString());
-		    		films.add(new Film(id, title, genre, plot, year, price, prod, budget, vote_avg));
+		    		films.add(new Film(/*id,*/ title, genre, plot, year, price, prod, budget, vote_avg));
 		    		
 		    	} 
 			}
@@ -887,5 +887,82 @@ public class UserEntityManager {
 	    	return result;
 	    }
 	    
+	    //retrieving all the rentals
+	    public static List<Rental> getRentals(){
+	    	List<Record> list;
+	    	List<Rental> rent = new ArrayList<>();
+	    	
+	    	try(Session session = driver.session()){
+	    		list = session.readTransaction(new TransactionWork<List<Record>>() {
+	    			@Override
+	    			public List<Record> execute(Transaction tx) {	
+	    				return matchUserFilms(tx);
+	    			}
+	    		});
+	    		
+	    		
+	    		for(Record rec: list) {
+					String username = rec.get("username").asString();
+					int price = rec.get("price").asInt();
+					String start_date = rec.get("start_date").asString();
+					LocalDate stDate = LocalDate.parse(start_date);
+					LocalDate eDate = stDate.plusDays(7);
+					String title = rec.get("title").asString();
+					
+					rent.add(new Rental(username, title, stDate, eDate, price));
+		    	} 
+			}
+	    	
+	    	return rent;
+	    } 
 	    
+	    private static List<Record> matchUserFilms(Transaction tx){
+    		
+    		List<Record> result=tx.run("MATCH (ee:Users)-[r:RENTS]-(ff:Movies)"
+	    			+ " RETURN r.date AS start_date, ff.title AS title, ff.weeklyPrice AS price, ee.username AS username"
+	    			).list();
+
+	    	return result;
+	    }
+	    
+	    public static void insertFilm(Film f) {
+	    	try(Session session = driver.session()){
+	    		session.writeTransaction(new TransactionWork<Void>() {
+	    			@Override
+	    			public Void execute(Transaction tx) {
+	    				createFilm(tx, f);
+	    				return null;
+	    			}
+	    		});
+	    	}
+	    	
+	    	return;
+	    }
+	    
+	    private static void createFilm(Transaction tx, Film f) {
+	    	Map<String, Object> params = new HashMap<>();
+     		params.put("title", f.getTitle());
+     		params.put("genre", f.getGenre());
+     		params.put("plot", f.getPlot());
+     		params.put("release_date", f.getReleaseDate());
+     		params.put("weekly_price", f.getWeeklyPrice());
+     		params.put("production_company",f.getProductionCompany());
+     		params.put("budget", f.getBudget());
+     		params.put("revenue", f.getRevenue());
+     		params.put("production_country", f.getProductionCountry());
+     		params.put("language", f.getLanguage());
+     		params.put("runtime", f.getRuntime());
+     		params.put("vote_count", f.getVoteCount());
+     		params.put("vote_avg", Double.toString(f.getVoteAvg()));
+     		
+ 	    	tx.run("CREATE(a:Movies{title:$title, genres:$genre, plot:$plot,"
+ 	    			+ "release_date:$release_date, weeklyPrice: $weekly_price,"
+ 	    			+ "production_companies:$production_company,"
+ 	    			+ "budget: $budget, revenue:$revenue, "
+ 	    			+ "production_countries: $production_country,"
+ 	    			+ "language: $language, runtime:$runtime,"
+ 	    			+ "vote_count: $vote_count, vote_average: $vote_avg})", params);
+ 	    	
+ 	    	return;
+	    }
 }

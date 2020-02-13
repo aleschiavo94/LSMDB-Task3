@@ -222,7 +222,7 @@ public class FXMLAdminController implements Initializable{
 		this.search_start_period.getEditor().clear();
 		this.search_end_period.getEditor().clear();
 		
-		//this.rentals.addAll(UserEntityManager.getRentals());
+		this.rentals.addAll(UserEntityManager.getRentals());
 		this.rental_table.setItems(rentals);
 		this.count_value_label.setText(Integer.toString(rentals.size()));
 		int sum = 0;
@@ -390,28 +390,25 @@ public class FXMLAdminController implements Initializable{
 		this.total_price_count_label.setText(Integer.toString(sum));
 		this.rental_table.setItems(list);
 		
+		this.search_usern_rental.clear();
+		this.search_start_period.getEditor().clear();
+		this.search_end_period.getEditor().clear();
+		
 	}
 	
 	public ObservableList<String> getTop3Movies(ObservableList<Rental> list){
-		ObservableList<Film> lista_film = FXCollections.observableArrayList();
+		ArrayList<String> lista_film = new ArrayList();
 		ObservableList<String> lista_finale = FXCollections.observableArrayList();
-		/*
+		
 		//inserting all the films in one list
 		for(Rental r: list) {
-			String set = r.getTitle();
-			for(Film film_set: set) {
-				lista_film.add(film_set);
-			}
+			String film = r.getTitle();
+			lista_film.add(film);
 			
-		} */
+		} 
 		
-		//counting the occurrences
-		ArrayList<String> arr = new ArrayList();
-		for(Film f: lista_film) {
-			arr.add(f.getTitle());
-		}
 		
-		lista_finale = countFrequencies(arr);
+		lista_finale = countFrequencies(lista_film);
 		
 		return lista_finale;
 	}
