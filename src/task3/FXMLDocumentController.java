@@ -50,7 +50,7 @@ public class FXMLDocumentController implements Initializable {
        
         //verifying user's informations
         user =  UserEntityManager.login(username_string, password_string);      
-       
+        
         if(user != null) {//if the user is registrated
  
         	//creating a new window 

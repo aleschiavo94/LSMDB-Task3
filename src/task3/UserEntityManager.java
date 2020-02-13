@@ -987,4 +987,91 @@ public class UserEntityManager {
  	    	
  	    	return;
 	    }
+	    
+	    
+	    public static List<Film> getSuggestedGenreFilms(User u){
+	    	List<Record> list;
+	    	List<Film> films = new ArrayList<>();
+	    	
+	    	try(Session session = driver.session()){
+	    		list = session.readTransaction(new TransactionWork<List<Record>>() {
+	    			@Override
+	    			public List<Record> execute(Transaction tx) {	
+	    				List<Record> result = new ArrayList<>();
+	    				String genre =  getLatestGenreRented(tx, u);
+	    				
+	    				String[] split = genre.split(",");
+	    				for(int i = 0; i < split.length; i++) {
+	    					List<Record> tmp = getFilmContainGenre(tx, split[i]);
+	    					
+	    					for(int c = 0; c < tmp.size(); c++) {
+	    						result.add(tmp.get(c));
+	    					}
+	    					
+	    				}
+	    				return result;
+	    				
+	    			}
+	    		});
+	    		
+	    		for(Record res: list) {
+	    			boolean contain = false;
+	    			String title = res.get("title").asString();
+	    			for(int i = 0; i < films.size(); i++) {
+	    				if(films.get(i).getTitle().equalsIgnoreCase(title))
+	    					contain = true;
+	    			}
+	    			if(contain) {
+	    				continue;
+	    			}
+					String genre = res.get("genre").asString();
+					String plot = res.get("plot").asString();
+					String year = res.get("year").asString();
+					int price = res.get("weeklyPrice").asInt();
+					String production_companies = res.get("production_companies").asString();
+					int budget = res.get("budget").asInt();
+					int revenue = res.get("revenue").asInt();
+					String production_country = res.get("production_countries").asString();
+					String language = res.get("original_language").asString();
+					int runtime = res.get("duration").asInt();
+					int vote_count = res.get("vote_count").asInt();
+					double vote_avg = Double.parseDouble(res.get("vote_avg").asString());
+					
+					films.add(new Film(title, genre, plot, year, price, production_companies, 
+		    				budget, revenue, production_country, language, runtime, vote_count, vote_avg));
+					
+		    	} 
+			}
+	    	return films;
+	    } 
+	
+	    private static String getLatestGenreRented(Transaction tx, User u){
+	    	Map<String, Object> params = new HashMap<>();
+     		params.put("username",u.getUsername());
+    		List<Record> result=tx.run("MATCH (m:Movies)-[r:RENTS]-(u:Users) "+
+    				"WHERE u.username=$username"
+	    			+ " RETURN m.genres as genre "+
+    				"order by r.date "+
+	    			"desc limit 1", params).list();
+    		String genre = null;
+    		System.out.println("lunghezza " + result.size());
+    		for(Record r : result) {
+    			genre = r.get("genre").asString();
+    		}
+	    	return genre;
+	    }
+	    
+	    private static List<Record> getFilmContainGenre(Transaction tx, String genre){
+	    	Map<String, Object> params = new HashMap<>();
+     		params.put("genre",genre);
+    		List<Record> result=tx.run("MATCH (movie:Movies) "+
+    				"where movie.genres contains $genre "+
+    				"return movie.id as id, movie.title as title, movie.production_countries AS production_countries, movie.production_companies as production_company," +
+    				"movie.budget as budget, movie.original_language AS original_language, movie.runtime AS duration," + 
+    				"movie.vote_count AS vote_count, movie.revenue as revenue, " +
+    				"movie.release_date as year, movie.overview as plot, movie.genres as genre," + 
+    				"movie.weeklyPrice as weeklyPrice, movie.vote_average as vote_avg", params).list();
+    		
+	    	return result;
+	    }
 }

@@ -33,6 +33,7 @@ public class MovieTime extends Application {
      */
     public static void main(String[] args) {
     	UserEntityManager.start();
+    	
     	launch(args);
     	
     	UserEntityManager.close();

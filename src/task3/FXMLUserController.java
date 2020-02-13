@@ -92,10 +92,16 @@ public class FXMLUserController implements Initializable {
 	@FXML private TableView<Film> top_rate_film;
 	@FXML private TableColumn<Film, String> top_rate_column;
 		private ObservableList<Film> top_rate_list;
-		
+	
+	// film of those followed
 	@FXML private TableView<Film> following_film_table;
 	@FXML private TableColumn<Film, String> following_film_column;
 		private ObservableList<Film> following_film;
+		
+		
+	@FXML private TableView<Film> film_genre_table;
+	@FXML private TableColumn<Film, String> film_genre_column;
+		private ObservableList<Film> genre_film;
 	
 	public void initialize(URL url, ResourceBundle rb) {
        //ininizializing of the table 
@@ -131,6 +137,11 @@ public class FXMLUserController implements Initializable {
 		username_followed_column.setCellValueFactory(new PropertyValueFactory<User, String>("username"));
 		followed = FXCollections.observableArrayList();
 		followed_table.setItems(followed);
+		
+		
+		film_genre_column.setCellValueFactory(new PropertyValueFactory<Film, String>("title"));
+		genre_film = FXCollections.observableArrayList();
+		film_genre_table.setItems(genre_film);
 		
 		all_user_column.setCellValueFactory(new PropertyValueFactory<User, String>("username"));
 		all_user = FXCollections.observableArrayList();
@@ -253,7 +264,7 @@ public class FXMLUserController implements Initializable {
 		following_film = FXCollections.observableArrayList();
 		following_film.addAll(UserEntityManager.getFollowingFilms(this.current_user));
 		following_film_table.setItems(following_film);
-		
+		genre_film.addAll(UserEntityManager.getSuggestedGenreFilms(current_user));
 	}
 	
 	
@@ -324,7 +335,7 @@ public class FXMLUserController implements Initializable {
 	}
 	
 	public void showCategoryFilmDetails(MouseEvent event) throws IOException{
-//		Film film = film_category.getSelectionModel().getSelectedItem();
+//		Film film = film_genre_table.getSelectionModel().getSelectedItem();
 //	    if (event.getClickCount() == 2 && film != null){
 //	        getFilmDetails(film);
 //	    }
