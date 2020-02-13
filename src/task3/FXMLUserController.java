@@ -295,6 +295,9 @@ public class FXMLUserController implements Initializable {
 		User selectedUser = all_user_table.getSelectionModel().getSelectedItem();
 		
 		UserEntityManager.followUser(current_user, selectedUser);
+		following_film = FXCollections.observableArrayList();
+		following_film.addAll(UserEntityManager.getFollowingFilms(this.current_user));
+		following_film_table.setItems(following_film);
 		initFollowed();
 	}
 	
