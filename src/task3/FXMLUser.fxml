@@ -25,7 +25,7 @@
                               <Font name="System Bold" size="14.0" />
                            </font>
                         </Text>
-                        <TableView fx:id="following_film_table" layoutX="14.0" layoutY="135.0" onMouseClicked="#showDetails" prefHeight="214.0" prefWidth="130.0">
+                        <TableView fx:id="following_film_table" layoutX="14.0" layoutY="135.0" onMouseClicked="#showFollowingFilmDetails" prefHeight="214.0" prefWidth="130.0">
                            <columns>
                               <TableColumn fx:id="following_film_column" editable="false" prefWidth="130.0" text="Title" />
                            </columns>
@@ -35,12 +35,12 @@
                               <Font name="System Bold" size="14.0" />
                            </font>
                         </Text>
-                        <TableView fx:id="film_category" layoutX="156.0" layoutY="135.0" onMouseClicked="#showDetails" prefHeight="214.0" prefWidth="130.0">
+                        <TableView fx:id="film_category" layoutX="156.0" layoutY="135.0" onMouseClicked="#showCategoryFilmDetails" prefHeight="214.0" prefWidth="130.0">
                            <columns>
                               <TableColumn fx:id="title_column11" editable="false" prefWidth="130.0" text="Title" />
                            </columns>
                         </TableView>
-                        <TableView fx:id="top_rate_film" layoutX="299.0" layoutY="135.0" onMouseClicked="#showDetails" prefHeight="214.0" prefWidth="130.0">
+                        <TableView fx:id="top_rate_film" layoutX="299.0" layoutY="135.0" onMouseClicked="#showTopRatedDetails" prefHeight="214.0" prefWidth="130.0">
                            <columns>
                               <TableColumn fx:id="top_rate_column" editable="false" prefWidth="130.0" text="Title" />
                            </columns>
@@ -50,7 +50,7 @@
                               <Font name="System Bold" size="14.0" />
                            </font>
                         </Text>
-                        <TableView fx:id="most_rent_film" layoutX="442.0" layoutY="135.0" onMouseClicked="#showDetails" prefHeight="214.0" prefWidth="130.0">
+                        <TableView fx:id="most_rent_film" layoutX="442.0" layoutY="135.0" onMouseClicked="#showTopRatingDetails" prefHeight="214.0" prefWidth="130.0">
                            <columns>
                               <TableColumn fx:id="most_rent_column" editable="false" prefWidth="130.0" text="Title" />
                            </columns>

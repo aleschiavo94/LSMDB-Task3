@@ -316,6 +316,34 @@ public class FXMLUserController implements Initializable {
 	    }
 	}
 	
+	public void showFollowingFilmDetails(MouseEvent event) throws IOException{
+		Film film = following_film_table.getSelectionModel().getSelectedItem();
+	    if (event.getClickCount() == 2 && film != null){
+	        getFilmDetails(film);
+	    }
+	}
+	
+	public void showCategoryFilmDetails(MouseEvent event) throws IOException{
+//		Film film = film_category.getSelectionModel().getSelectedItem();
+//	    if (event.getClickCount() == 2 && film != null){
+//	        getFilmDetails(film);
+//	    }
+	}
+	
+	public void showTopRatedDetails(MouseEvent event) throws IOException{
+		Film film = top_rate_film.getSelectionModel().getSelectedItem();
+	    if (event.getClickCount() == 2 && film != null){
+	        getFilmDetails(film);
+	    }
+	}
+	
+	public void showTopRatingDetails(MouseEvent event) throws IOException{
+		Film film = most_rent_film.getSelectionModel().getSelectedItem();
+	    if (event.getClickCount() == 2 && film != null){
+	        getFilmDetails(film);
+	    }
+	}
+	
 	//getting the details for the selected film
 	public void getFilmDetails( Film f )throws IOException {
 		//opening a new window with a new controller
@@ -332,7 +360,6 @@ public class FXMLUserController implements Initializable {
         
         controller.setInfo(f, film_in_db, current_user);
         
-       
         scene = new Scene(root);
         dialogStage.setTitle(f.getTitle());
         dialogStage.setScene(scene);
@@ -341,7 +368,6 @@ public class FXMLUserController implements Initializable {
 	
 	//live search for films by title
 	public void setFilmSearched() {
-		
 		String s = search_field.getText();
 		if(s.length() > 0 )
 			getFilmSearched(s);
@@ -415,14 +441,11 @@ public class FXMLUserController implements Initializable {
 			newpass = HashClass.convertToSha(newpass);
 			current_user.setPassword(newpass);
 		}
-		
 		if(dep > 0)
 			current_user.setCredit(current_user.getCredit() + dep);
 		
-		
 		UserEntityManager.updateUserInfo(current_user);
 		initUserInfo();
-
 	}
 	
 	//message error for wrong password

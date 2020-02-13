@@ -215,7 +215,7 @@ public class UserEntityManager {
 	    
 	    
 	    private static StatementResult matchFilms(Transaction tx){
-	    	StatementResult result=tx.run("MATCH(ff:Movies) RETURN ff.id AS id, ff.title AS title,"
+	    	StatementResult result=tx.run("MATCH(ff:Movies) RETURN ff.title AS title,"
 	    			+ "ff.genres AS genre, ff.overview AS plot, ff.release_date AS year,"
 	    			+ "ff.weeklyPrice AS weeklyPrice, ff.production_companies AS production_companies,"
 	    			+ "ff.budget AS budget, ff.revenue AS revenue, ff.production_countries AS production_countries,"
@@ -254,8 +254,8 @@ public class UserEntityManager {
     		params.put("title", title);
     		
     		StatementResult result = tx.run("MATCH(ee:Users)-[r:RATES]->(ff:Movies) "
-    				+ "where ee.username=$username and ff.title=$title "
-    				+ "return r.vote", params);
+    				+ "WHERE ee.username=$username AND ff.title=$title "
+    				+ "RETURN r.vote", params);
 	    	
 	    	return result;
 	    }
@@ -292,8 +292,8 @@ public class UserEntityManager {
     		params.put("title", title);
     		
     		List<Record> result = tx.run("MATCH (u:Users)-[r:RATES]->(m:Movies) "
-    				+ "where m.title=$title "
-    				+ "return r.vote as vote, u.username as username", params).list();
+    				+ "WHERE m.title=$title "
+    				+ "RETURN r.vote as vote, u.username as username", params).list();
 	    	
 	    	return result;
 	    }
@@ -325,8 +325,8 @@ public class UserEntityManager {
     		params.put("ts", ts);
     		params.put("vote", vote);
     		
-	    	tx.run("MATCH (ee:Users),(ff:Movies)\r\n" + 
-	    			"WHERE ee.username=$username and ff.title=$title\r\n" + 
+	    	tx.run("MATCH (ee:Users),(ff:Movies) " + 
+	    			"WHERE ee.username=$username and ff.title=$title " + 
 	    			"CREATE (ee)-[r:RATES{vote:$vote, timestamp:$ts}]->(ff)", params);
 	    	
 	    	return;
@@ -416,7 +416,7 @@ public class UserEntityManager {
     		
 	    	tx.run("MATCH(ff:Movies) " + 
 	    			"WHERE  ff.title=$title " + 
-	    			"SET ff.vote_count=$count , ff.vote_average=$avg", params);
+	    			"SET ff.vote_count=$count, ff.vote_average=$avg", params);
 	    	
 	    	return null;
 	    }
@@ -445,8 +445,8 @@ public class UserEntityManager {
     		params.put("date", date);
     		
 	    	tx.run("MATCH (ee:Users),(ff:Movies) "
-	    			+ " WHERE ee.username=$username and ff.title=$title"
-	    			+ " CREATE(ee)-[r:RENTS{date:$date}]->(ff) RETURN r", params);
+	    			+ "WHERE ee.username=$username and ff.title=$title "
+	    			+ "CREATE(ee)-[r:RENTS{date:$date}]->(ff) RETURN r", params);
 	    	
 	    	return;
 	    }
@@ -563,8 +563,8 @@ public class UserEntityManager {
     		params.put("username_u2", u2.getUsername());
     		
     		tx.run("MATCH (u1:Users),(u2:Users) "
-	    			+ " WHERE u1.username=$username_u1 and u2.username=$username_u2"
-	    			+ " CREATE(u1)-[f:FOLLOWS]->(u2) RETURN f", params);
+	    			+ "WHERE u1.username=$username_u1 and u2.username=$username_u2 "
+	    			+ "CREATE(u1)-[f:FOLLOWS]->(u2) RETURN f", params);
 	    	
 	    	return;
 	    }
@@ -608,7 +608,7 @@ public class UserEntityManager {
 	    }
 	    
 	    private static StatementResult matchUsers(Transaction tx) {
-	    	StatementResult result = tx.run("MATCH (ee:Users) WHERE ee.username <> \"admin\" "
+	    	StatementResult result = tx.run("MATCH (ee:Users) WHERE ee.username <> 'admin' "
 	    			+ "RETURN ee.id AS id, ee.username AS username, ee.password AS password,"
 	    			+ "ee.surname AS surname, ee.name AS name, ee.credit AS credit, ee.email AS email;");
 	    	
@@ -768,30 +768,36 @@ public class UserEntityManager {
 	    		});
 	    		
 	    		for(Record res: list) {
-	    	  		//int id = res.get("id").asInt();
-					String title = res.get("title").asString();
+	    	  		String title = res.get("title").asString();
 					String genre = res.get("genre").asString();
 					String plot = res.get("plot").asString();
 					String year = res.get("year").asString();
 					int price = res.get("weeklyPrice").asInt();
-					String prod = res.get("production_company").asString();
+					String production_companies = res.get("production_companies").asString();
 					int budget = res.get("budget").asInt();
+					int revenue = res.get("revenue").asInt();
+					String production_country = res.get("production_countries").asString();
+					String language = res.get("original_language").asString();
+					int runtime = res.get("duration").asInt();
+					int vote_count = res.get("vote_count").asInt();
 					double vote_avg = Double.parseDouble(res.get("vote_avg").asString());
-		    		films.add(new Film(/*id,*/ title, genre, plot, year, price, prod, budget, vote_avg));
-		    		
+					
+					films.add(new Film(title, genre, plot, year, price, production_companies, 
+		    				budget, revenue, production_country, language, runtime, vote_count, vote_avg));
 		    	} 
 			}
-
 	    	return films;
 	    } 
 	    
 	    private static List<Record> topRentedFilms(Transaction tx){
     		
-    		List<Record> result=tx.run("MATCH (ff:Movies)-[r:RENTS]-()" + 
-    				"return ff.id AS id, ff.title AS title," + 
+    		List<Record> result=tx.run("MATCH (ff:Movies)-[r:RENTS]-() " + 
+    				"RETURN ff.title AS title," + 
     				"ff.genres AS genre, ff.overview AS plot, ff.release_date AS year," + 
-    				"ff.weeklyPrice AS weeklyPrice, ff.production_company AS production_company," + 
-    				"ff.budget AS budget, ff.vote_average as vote_avg, count(r) as conta " + 
+    				"ff.weeklyPrice AS weeklyPrice, ff.production_companies AS production_companies," + 
+    				"ff.budget AS budget, ff.revenue AS revenue, ff.production_countries AS production_countries," + 
+    				"ff.original_language AS language, ff.runtime AS duration, ff.vote_count AS vote_count," + 
+    				"ff.vote_average as vote_avg, count(r) as conta " + 
     				"ORDER BY conta " + 
     				"DESC LIMIT 10").list();
 
@@ -812,16 +818,22 @@ public class UserEntityManager {
 	    		});
 	    		
 	    		for(Record res: list) {
-	    	  		//int id = res.get("id").asInt();
-					String title = res.get("title").asString();
+	    			String title = res.get("title").asString();
 					String genre = res.get("genre").asString();
 					String plot = res.get("plot").asString();
 					String year = res.get("year").asString();
 					int price = res.get("weeklyPrice").asInt();
-					String prod = res.get("production_company").asString();
+					String production_companies = res.get("production_companies").asString();
 					int budget = res.get("budget").asInt();
+					int revenue = res.get("revenue").asInt();
+					String production_country = res.get("production_countries").asString();
+					String language = res.get("original_language").asString();
+					int runtime = res.get("duration").asInt();
+					int vote_count = res.get("vote_count").asInt();
 					double vote_avg = Double.parseDouble(res.get("vote_avg").asString());
-		    		films.add(new Film(/*id,*/ title, genre, plot, year, price, prod, budget, vote_avg));
+					
+					films.add(new Film(title, genre, plot, year, price, production_companies, 
+		    				budget, revenue, production_country, language, runtime, vote_count, vote_avg));
 		    		
 		    	} 
 			}
@@ -829,12 +841,13 @@ public class UserEntityManager {
 	    } 
 	    
 	    private static List<Record> topRatedFilms(Transaction tx){
-    		
-    		List<Record> result=tx.run("MATCH (ff:Movies)-[r:RATES]-()" + 
-    				"return ff.id AS id, ff.title AS title," + 
+    		List<Record> result=tx.run("MATCH (ff:Movies)-[r:RATES]-() " + 
+    				"RETURN ff.title AS title," + 
     				"ff.genres AS genre, ff.overview AS plot, ff.release_date AS year," + 
-    				"ff.weeklyPrice AS weeklyPrice, ff.production_company AS production_company," + 
-    				"ff.budget AS budget, ff.vote_average as vote_avg, sum(r.vote) as rate " + 
+    				"ff.weeklyPrice AS weeklyPrice, ff.production_companies AS production_companies," + 
+    				"ff.budget AS budget, ff.revenue AS revenue, ff.production_countries AS production_countries," + 
+    				"ff.original_language AS language, ff.runtime AS duration, ff.vote_count AS vote_count," + 
+    				"ff.vote_average as vote_avg, sum(r.vote) as rate " + 
     				"ORDER BY rate " + 
     				"DESC LIMIT 10").list();
 
@@ -857,16 +870,22 @@ public class UserEntityManager {
 	    		});
 	    		
 	    		for(Record res: list) {
-	    	  		//int id = res.get("id").asInt();
-					String title = res.get("title").asString();
+	    			String title = res.get("title").asString();
 					String genre = res.get("genre").asString();
 					String plot = res.get("plot").asString();
 					String year = res.get("year").asString();
 					int price = res.get("weeklyPrice").asInt();
-					String prod = res.get("production_company").asString();
+					String production_companies = res.get("production_companies").asString();
 					int budget = res.get("budget").asInt();
+					int revenue = res.get("revenue").asInt();
+					String production_country = res.get("production_countries").asString();
+					String language = res.get("original_language").asString();
+					int runtime = res.get("duration").asInt();
+					int vote_count = res.get("vote_count").asInt();
 					double vote_avg = Double.parseDouble(res.get("vote_avg").asString());
-		    		films.add(new Film(/*id,*/ title, genre, plot, year, price, prod, budget, vote_avg));
+					
+					films.add(new Film(title, genre, plot, year, price, production_companies, 
+		    				budget, revenue, production_country, language, runtime, vote_count, vote_avg));
 		    		
 		    	} 
 			}
@@ -877,11 +896,14 @@ public class UserEntityManager {
 	    private static List<Record> followingFilms(Transaction tx, User u){
 	    	Map<String, Object> params = new HashMap<>();
     		params.put("username", u.getUsername());
-    		List<Record> result=tx.run("MATCH (u:Users)-[t:FOLLOWS]->(u2:Users)-[r:RENTS]-(movie)"+
-    				"where u.username = $username " +
-    				"return distinct movie.id as id, movie.title as title,"+
-    				"movie.production_companies as production_company, movie.budget as budget,"+
-    				"movie.release_date as year, movie.overview as plot, movie.genres as genre,"+
+    	
+    		List<Record> result=tx.run("MATCH (u:Users)-[t:FOLLOWS]->(u2:Users)-[r:RENTS]-(movie) " + 
+    				"WHERE u.username = $username " + 
+    				"RETURN DISTINCT movie.id as id, movie.title as title, movie.revenue AS revenue," + 
+    				"movie.production_countries AS production_countries, movie.production_companies as production_company," +
+    				"movie.budget as budget, movie.original_language AS original_language, movie.runtime AS duration," + 
+    				"movie.vote_count AS vote_count," +
+    				"movie.release_date as year, movie.overview as plot, movie.genres as genre," + 
     				"movie.weeklyPrice as weeklyPrice, movie.vote_average as vote_avg", params).list();
 
 	    	return result;
