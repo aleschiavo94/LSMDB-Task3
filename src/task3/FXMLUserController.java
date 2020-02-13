@@ -335,10 +335,10 @@ public class FXMLUserController implements Initializable {
 	}
 	
 	public void showCategoryFilmDetails(MouseEvent event) throws IOException{
-//		Film film = film_genre_table.getSelectionModel().getSelectedItem();
-//	    if (event.getClickCount() == 2 && film != null){
-//	        getFilmDetails(film);
-//	    }
+		Film film = film_genre_table.getSelectionModel().getSelectedItem();
+	    if (event.getClickCount() == 2 && film != null){
+	        getFilmDetails(film);
+	    }
 	}
 	
 	public void showTopRatedDetails(MouseEvent event) throws IOException{

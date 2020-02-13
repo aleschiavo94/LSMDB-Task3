@@ -1054,7 +1054,7 @@ public class UserEntityManager {
     				"order by r.date "+
 	    			"desc limit 1", params).list();
     		String genre = null;
-    		System.out.println("lunghezza " + result.size());
+    		
     		for(Record r : result) {
     			genre = r.get("genre").asString();
     		}
