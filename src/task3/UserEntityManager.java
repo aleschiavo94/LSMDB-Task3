@@ -132,7 +132,6 @@ public class UserEntityManager {
 	    	return exists;
 	    } 
 	    
-	    
 	    //inserting a new user
 	    public static void insertUser(User u) {
 	    	try(Session session = driver.session()){
@@ -260,6 +259,7 @@ public class UserEntityManager {
 	    	return result;
 	    }
 	    
+	    //verify if user have already vote the film
 	    public static List<String> getAllRatingByFilm(Film f) {
 	    	List<String> list = new ArrayList<String>();
 	    	List<Record> record;
@@ -451,7 +451,7 @@ public class UserEntityManager {
 	    	return;
 	    }
 	    
-	  //getting all the users
+	    //getting all the users
 	    public static List<User> getFollowed(User user) {
 	    	List<User> list = new ArrayList<>();
 	    	List<Record> record;
@@ -498,7 +498,7 @@ public class UserEntityManager {
 	    	return result;
 	    }
 	    
-	    //getting all the users
+	    //getting the users followed
 	    public static List<User> getUsersToFollow(User user) {
 	    	List<User> list = new ArrayList<>();
 	    	List<Record> record;
@@ -543,6 +543,7 @@ public class UserEntityManager {
 	    	return result;
 	    }
 	    
+	    //add new followed person
 	    public static void followUser(User current_user, User followed) {
 	    	try(Session session = driver.session()){
 	    		session.writeTransaction(new TransactionWork<Void>() {
@@ -569,6 +570,382 @@ public class UserEntityManager {
 	    	return;
 	    }
 	    
+	    //update user info
+	    public static void updateUserInfo(User user) {	    	
+	    	try(Session session = driver.session()){
+	    		session.writeTransaction(new TransactionWork<Void>() {
+	    			@Override
+	    			public Void execute(Transaction tx) {
+	    				updateUserNode(tx, user);
+	    				return null;
+	    			}
+	    		});
+	    	}	    	
+	    	return;
+	    } 
+	    
+    	private static void updateUserNode(Transaction tx, User u) {
+ 	    	Map<String, Object> params = new HashMap<>();
+     		params.put("username", u.getUsername());
+     		params.put("password", u.getPassword());
+     		params.put("credit", u.getCredit());
+     		params.put("email", u.getEmail());
+     		
+ 	    	tx.run("MATCH (n:Users ) WHERE n.username = $username " +
+ 	    			"SET n.email=$email, n.credit=$credit, n.password=$password", params);
+ 	    	
+ 	    	return;
+ 	    }
+    	 
+    	//update credit when rent film
+    	public static void updateUserCredit(User u, int new_credit) {
+ 	    	String username = u.getUsername();
+ 	    	try(Session session = driver.session()){
+ 	    		session.writeTransaction(new TransactionWork<Void>() {
+ 	    			@Override
+ 	    			public Void execute(Transaction tx) {
+ 	    				updateCredit(tx, username, new_credit);
+ 	    				return null;
+ 	    			}
+ 	    		});
+ 	    	}
+ 	    	
+ 	    	return;
+ 	    }
+ 	    
+ 	    private static void updateCredit(Transaction tx, String username, int new_credit){
+ 	    	Map<String, Object> params = new HashMap<>();
+      		params.put("username",username);
+      		params.put("new_credit",new_credit);
+      		
+     		tx.run("MATCH (u:Users) "+
+     				"WHERE u.username = $username "
+     				+ "SET u.credit = $new_credit", params);
+     		
+ 	    	return;
+ 	    }
+	    
+ 	    //query to find the most rented movie
+	    public static List<Film> getTopRentedFilms(){
+	    	List<Record> list;
+	    	List<Film> films = new ArrayList<>();
+	    	
+	    	try(Session session = driver.session()){
+	    		list = session.readTransaction(new TransactionWork<List<Record>>() {
+	    			@Override
+	    			public List<Record> execute(Transaction tx) {	
+	    				return topRentedFilms(tx);
+	    			}
+	    		});
+	    		
+	    		for(Record res: list) {
+	    	  		String title = res.get("title").asString();
+					String genre = res.get("genre").asString();
+					String plot = res.get("plot").asString();
+					String year = res.get("year").asString();
+					int price = res.get("weeklyPrice").asInt();
+					String production_companies = res.get("production_companies").asString();
+					int budget = res.get("budget").asInt();
+					int revenue = res.get("revenue").asInt();
+					String production_country = res.get("production_countries").asString();
+					String language = res.get("original_language").asString();
+					int runtime = res.get("duration").asInt();
+					int vote_count = res.get("vote_count").asInt();
+					double vote_avg = Double.parseDouble(res.get("vote_avg").asString());
+					
+					films.add(new Film(title, genre, plot, year, price, production_companies, 
+		    				budget, revenue, production_country, language, runtime, vote_count, vote_avg));
+		    	} 
+			}
+	    	return films;
+	    } 
+	    
+	    private static List<Record> topRentedFilms(Transaction tx){
+    		
+    		List<Record> result=tx.run("MATCH (ff:Movies)-[r:RENTS]-() " + 
+    				"RETURN ff.title AS title," + 
+    				"ff.genres AS genre, ff.overview AS plot, ff.release_date AS year," + 
+    				"ff.weeklyPrice AS weeklyPrice, ff.production_companies AS production_companies," + 
+    				"ff.budget AS budget, ff.revenue AS revenue, ff.production_countries AS production_countries," + 
+    				"ff.original_language AS language, ff.runtime AS duration, ff.vote_count AS vote_count," + 
+    				"ff.vote_average as vote_avg, count(r) as conta " + 
+    				"ORDER BY conta " + 
+    				"DESC LIMIT 10").list();
+
+	    	return result;
+	    }
+	    
+	    //query to find the top rated movie
+	    public static List<Film> getTopRatedFilms(){
+	    	List<Record> list;
+	    	List<Film> films = new ArrayList<>();
+	    	
+	    	try(Session session = driver.session()){
+	    		list = session.readTransaction(new TransactionWork<List<Record>>() {
+	    			@Override
+	    			public List<Record> execute(Transaction tx) {	
+	    				return topRatedFilms(tx);
+	    			}
+	    		});
+	    		
+	    		for(Record res: list) {
+	    			String title = res.get("title").asString();
+					String genre = res.get("genre").asString();
+					String plot = res.get("plot").asString();
+					String year = res.get("year").asString();
+					int price = res.get("weeklyPrice").asInt();
+					String production_companies = res.get("production_companies").asString();
+					int budget = res.get("budget").asInt();
+					int revenue = res.get("revenue").asInt();
+					String production_country = res.get("production_countries").asString();
+					String language = res.get("original_language").asString();
+					int runtime = res.get("duration").asInt();
+					int vote_count = res.get("vote_count").asInt();
+					double vote_avg = Double.parseDouble(res.get("vote_avg").asString());
+					
+					films.add(new Film(title, genre, plot, year, price, production_companies, 
+		    				budget, revenue, production_country, language, runtime, vote_count, vote_avg));
+		    		
+		    	} 
+			}
+	    	return films;
+	    } 
+	    
+	    private static List<Record> topRatedFilms(Transaction tx){
+    		List<Record> result=tx.run("MATCH (ff:Movies)-[r:RATES]-() " + 
+    				"RETURN ff.title AS title," + 
+    				"ff.genres AS genre, ff.overview AS plot, ff.release_date AS year," + 
+    				"ff.weeklyPrice AS weeklyPrice, ff.production_companies AS production_companies," + 
+    				"ff.budget AS budget, ff.revenue AS revenue, ff.production_countries AS production_countries," + 
+    				"ff.original_language AS language, ff.runtime AS duration, ff.vote_count AS vote_count," + 
+    				"ff.vote_average as vote_avg, sum(r.vote) as rate " + 
+    				"ORDER BY rate " + 
+    				"DESC LIMIT 10").list();
+
+	    	return result;
+	    }
+	    
+	    //query to find film that followed user have rented
+	    public static List<Film> getFollowingFilms(User u){
+	    	List<Record> list;
+	    	List<Film> films = new ArrayList<>();
+	    	
+	    	try(Session session = driver.session()){
+	    		list = session.readTransaction(new TransactionWork<List<Record>>() {
+	    			@Override
+	    			public List<Record> execute(Transaction tx) {	
+	    				return followingFilms(tx, u);
+	    			}
+	    		});
+	    		
+	    		for(Record res: list) {
+	    			String title = res.get("title").asString();
+					String genre = res.get("genre").asString();
+					String plot = res.get("plot").asString();
+					String year = res.get("year").asString();
+					int price = res.get("weeklyPrice").asInt();
+					String production_companies = res.get("production_companies").asString();
+					int budget = res.get("budget").asInt();
+					int revenue = res.get("revenue").asInt();
+					String production_country = res.get("production_countries").asString();
+					String language = res.get("original_language").asString();
+					int runtime = res.get("duration").asInt();
+					int vote_count = res.get("vote_count").asInt();
+					double vote_avg = Double.parseDouble(res.get("vote_avg").asString());
+					
+					films.add(new Film(title, genre, plot, year, price, production_companies, 
+		    				budget, revenue, production_country, language, runtime, vote_count, vote_avg));
+		    		
+		    	} 
+			}
+
+	    	return films;
+	    } 
+	    
+	    private static List<Record> followingFilms(Transaction tx, User u){
+	    	Map<String, Object> params = new HashMap<>();
+    		params.put("username", u.getUsername());
+    	
+    		List<Record> result=tx.run("MATCH (u:Users)-[t:FOLLOWS]->(u2:Users)-[r:RENTS]-(movie) " + 
+    				"WHERE u.username = $username " + 
+    				"RETURN DISTINCT movie.id as id, movie.title as title, movie.revenue AS revenue," + 
+    				"movie.production_countries AS production_countries, movie.production_companies as production_company," +
+    				"movie.budget as budget, movie.original_language AS original_language, movie.runtime AS duration," + 
+    				"movie.vote_count AS vote_count," +
+    				"movie.release_date as year, movie.overview as plot, movie.genres as genre," + 
+    				"movie.weeklyPrice as weeklyPrice, movie.vote_average as vote_avg", params).list();
+
+	    	return result;
+	    }
+	    
+	    //retrieving all the rentals
+	    public static List<Rental> getRentals(){
+	    	List<Record> list;
+	    	List<Rental> rent = new ArrayList<>();
+	    	
+	    	try(Session session = driver.session()){
+	    		list = session.readTransaction(new TransactionWork<List<Record>>() {
+	    			@Override
+	    			public List<Record> execute(Transaction tx) {	
+	    				return matchUserFilms(tx);
+	    			}
+	    		});
+	    		
+	    		
+	    		for(Record rec: list) {
+					String username = rec.get("username").asString();
+					int price = rec.get("price").asInt();
+					String start_date = rec.get("start_date").asString();
+					LocalDate stDate = LocalDate.parse(start_date);
+					LocalDate eDate = stDate.plusDays(7);
+					String title = rec.get("title").asString();
+					
+					rent.add(new Rental(username, title, stDate, eDate, price));
+		    	} 
+			}
+	    	
+	    	return rent;
+	    } 
+	    
+	    private static List<Record> matchUserFilms(Transaction tx){
+    		
+    		List<Record> result=tx.run("MATCH (ee:Users)-[r:RENTS]-(ff:Movies)"
+	    			+ " RETURN r.date AS start_date, ff.title AS title, ff.weeklyPrice AS price, ee.username AS username"
+	    			).list();
+
+	    	return result;
+	    }
+	    
+	    //insert new film
+	    public static void insertFilm(Film f) {
+	    	try(Session session = driver.session()){
+	    		session.writeTransaction(new TransactionWork<Void>() {
+	    			@Override
+	    			public Void execute(Transaction tx) {
+	    				createFilm(tx, f);
+	    				return null;
+	    			}
+	    		});
+	    	}
+	    	
+	    	return;
+	    }
+	    
+	    private static void createFilm(Transaction tx, Film f) {
+	    	Map<String, Object> params = new HashMap<>();
+     		params.put("title", f.getTitle());
+     		params.put("genre", f.getGenre());
+     		params.put("plot", f.getPlot());
+     		params.put("release_date", f.getReleaseDate());
+     		params.put("weekly_price", f.getWeeklyPrice());
+     		params.put("production_company",f.getProductionCompany());
+     		params.put("budget", f.getBudget());
+     		params.put("revenue", f.getRevenue());
+     		params.put("production_country", f.getProductionCountry());
+     		params.put("language", f.getLanguage());
+     		params.put("runtime", f.getRuntime());
+     		params.put("vote_count", f.getVoteCount());
+     		params.put("vote_avg", Double.toString(f.getVoteAvg()));
+     		
+ 	    	tx.run("CREATE(a:Movies{title:$title, genres:$genre, plot:$plot,"
+ 	    			+ "release_date:$release_date, weeklyPrice: $weekly_price,"
+ 	    			+ "production_companies:$production_company,"
+ 	    			+ "budget: $budget, revenue:$revenue, "
+ 	    			+ "production_countries: $production_country,"
+ 	    			+ "language: $language, runtime:$runtime,"
+ 	    			+ "vote_count: $vote_count, vote_average: $vote_avg})", params);
+ 	    	
+ 	    	return;
+	    }
+	    
+	    //query to find film that have the same genre as the last rented movie
+	    public static List<Film> getSuggestedGenreFilms(User u){
+	    	List<Record> list;
+	    	List<Film> films = new ArrayList<>();
+	    	
+	    	try(Session session = driver.session()){
+	    		list = session.readTransaction(new TransactionWork<List<Record>>() {
+	    			@Override
+	    			public List<Record> execute(Transaction tx) {	
+	    				List<Record> result = new ArrayList<>();
+	    				String genre =  getLatestGenreRented(tx, u);
+	    				if(genre == null)
+	    					return result;
+	    				
+	    				String[] split = genre.split(",");
+	    				for(int i = 0; i < split.length; i++) {
+	    					List<Record> tmp = getFilmContainGenre(tx, split[i]);
+	    					
+	    					for(int c = 0; c < tmp.size(); c++) {
+	    						result.add(tmp.get(c));
+	    					}
+	    					
+	    				}
+	    				return result;
+	    				
+	    			}
+	    		});
+	    		
+	    		for(Record res: list) {
+	    			boolean contain = false;
+	    			String title = res.get("title").asString();
+	    			for(int i = 0; i < films.size(); i++) {
+	    				if(films.get(i).getTitle().equalsIgnoreCase(title))
+	    					contain = true;
+	    			}
+	    			if(contain) {
+	    				continue;
+	    			}
+					String genre = res.get("genre").asString();
+					String plot = res.get("plot").asString();
+					String year = res.get("year").asString();
+					int price = res.get("weeklyPrice").asInt();
+					String production_companies = res.get("production_companies").asString();
+					int budget = res.get("budget").asInt();
+					int revenue = res.get("revenue").asInt();
+					String production_country = res.get("production_countries").asString();
+					String language = res.get("original_language").asString();
+					int runtime = res.get("duration").asInt();
+					int vote_count = res.get("vote_count").asInt();
+					double vote_avg = Double.parseDouble(res.get("vote_avg").asString());
+					
+					films.add(new Film(title, genre, plot, year, price, production_companies, 
+		    				budget, revenue, production_country, language, runtime, vote_count, vote_avg));
+					
+		    	} 
+			}
+	    	return films;
+	    } 
+	
+	    private static String getLatestGenreRented(Transaction tx, User u){
+	    	Map<String, Object> params = new HashMap<>();
+     		params.put("username",u.getUsername());
+    		List<Record> result=tx.run("MATCH (m:Movies)-[r:RENTS]-(u:Users) "+
+    				"WHERE u.username=$username"
+	    			+ " RETURN m.genres as genre "+
+    				"order by r.date "+
+	    			"desc limit 1", params).list();
+    		String genre = null;
+    		
+    		for(Record r : result) {
+    			genre = r.get("genre").asString();
+    		}
+	    	return genre;
+	    }
+	    
+	    private static List<Record> getFilmContainGenre(Transaction tx, String genre){
+	    	Map<String, Object> params = new HashMap<>();
+     		params.put("genre",genre);
+    		List<Record> result=tx.run("MATCH (movie:Movies) "+
+    				"where movie.genres contains $genre "+
+    				"return movie.id as id, movie.title as title, movie.production_countries AS production_countries, movie.production_companies as production_company," +
+    				"movie.budget as budget, movie.original_language AS original_language, movie.runtime AS duration," + 
+    				"movie.vote_count AS vote_count, movie.revenue as revenue, " +
+    				"movie.release_date as year, movie.overview as plot, movie.genres as genre," + 
+    				"movie.weeklyPrice as weeklyPrice, movie.vote_average as vote_avg", params).list();
+    		
+	    	return result;
+	    }    
 	    
 	    /*
 	     * ADMIN CONTROLLER FUNCTIONS
@@ -664,11 +1041,6 @@ public class UserEntityManager {
 	    		session.writeTransaction(new TransactionWork<Void>() {
 	    			@Override
 	    			public Void execute(Transaction tx) {
-	    				System.out.println("entra");
-	    				/*deleteUserMovies(tx, user);
-	    				deleteUserRatings(tx, user);
-	    				deleteUserFollow(tx, user);
-	    				deleteUser(tx, user);*/
 	    				deleteUserDetach(tx, user);
 	    				return null;
 	    			}
@@ -685,393 +1057,5 @@ public class UserEntityManager {
 	    	
 	    	return;
 	    }
-	    
-	    
-    	public static void updateUserInfo(User user) {
-	    	
-	    	try(Session session = driver.session()){
-	    		session.writeTransaction(new TransactionWork<Void>() {
-	    			@Override
-	    			public Void execute(Transaction tx) {
-	    				/*deleteUserMovies(tx, user);
-	    				deleteUserRatings(tx, user);
-	    				deleteUserFollow(tx, user);
-	    				deleteUser(tx, user);*/
-	    				updateUserNode(tx, user);
-	    				return null;
-	    			}
-	    		});
-	    	}
-	    	
-	    	return;
-	    } 
-    	 private static void updateUserNode(Transaction tx, User u) {
- 	    	Map<String, Object> params = new HashMap<>();
-     		params.put("username", u.getUsername());
-     		params.put("password", u.getPassword());
-     		params.put("credit", u.getCredit());
-     		params.put("email", u.getEmail());
-     		//params.put("credit", u.);
-     		
- 	    	tx.run("MATCH (n:Users ) WHERE n.username = $username " +
- 	    			"SET n.email=$email, n.credit=$credit, n.password=$password", params);
- 	    	
- 	    	return;
- 	    }
-	    /*private static void deleteUserMovies(Transaction tx, User u) {
-	    	Map<String, Object> params = new HashMap<>();
-    		params.put("username", u.getUsername());
-    		
-	    	tx.run("MATCH (n { username: $username})-[r:RENTS]-() DELETE r", params);
-	    	
-	    	return;
-	    }
-	    
-	    private static void deleteUserRatings(Transaction tx, User u) {
-	    	Map<String, Object> params = new HashMap<>();
-    		params.put("username", u.getUsername());
-    		
-	    	tx.run("MATCH (n { username: $username'})-[r:RATES]-() delete r", params);
-	    	
-	    	return;
-	    }
-
-	    private static void deleteUserFollow(Transaction tx, User u) {
-	    	Map<String, Object> params = new HashMap<>();
-    		params.put("username", u.getUsername());
-    		
-	    	tx.run("MATCH (n {username: $username'})-[:FOLLOWS]-() delete n", params);
-	    	
-	    	return;
-	    }
-	    
-	    private static void deleteUser(Transaction tx, User u) {
-	    	Map<String, Object> params = new HashMap<>();
-    		params.put("username", u.getUsername());
-    		
-	    	tx.run("MATCH (n { username: $username'}) delete n", params);
-	    	
-	    	return;
-	    }*/
-
-	    
-	    public static List<Film> getTopRentedFilms(){
-	    	List<Record> list;
-	    	List<Film> films = new ArrayList<>();
-	    	
-	    	try(Session session = driver.session()){
-	    		list = session.readTransaction(new TransactionWork<List<Record>>() {
-	    			@Override
-	    			public List<Record> execute(Transaction tx) {	
-	    				return topRentedFilms(tx);
-	    			}
-	    		});
-	    		
-	    		for(Record res: list) {
-	    	  		String title = res.get("title").asString();
-					String genre = res.get("genre").asString();
-					String plot = res.get("plot").asString();
-					String year = res.get("year").asString();
-					int price = res.get("weeklyPrice").asInt();
-					String production_companies = res.get("production_companies").asString();
-					int budget = res.get("budget").asInt();
-					int revenue = res.get("revenue").asInt();
-					String production_country = res.get("production_countries").asString();
-					String language = res.get("original_language").asString();
-					int runtime = res.get("duration").asInt();
-					int vote_count = res.get("vote_count").asInt();
-					double vote_avg = Double.parseDouble(res.get("vote_avg").asString());
-					
-					films.add(new Film(title, genre, plot, year, price, production_companies, 
-		    				budget, revenue, production_country, language, runtime, vote_count, vote_avg));
-		    	} 
-			}
-	    	return films;
-	    } 
-	    
-	    private static List<Record> topRentedFilms(Transaction tx){
-    		
-    		List<Record> result=tx.run("MATCH (ff:Movies)-[r:RENTS]-() " + 
-    				"RETURN ff.title AS title," + 
-    				"ff.genres AS genre, ff.overview AS plot, ff.release_date AS year," + 
-    				"ff.weeklyPrice AS weeklyPrice, ff.production_companies AS production_companies," + 
-    				"ff.budget AS budget, ff.revenue AS revenue, ff.production_countries AS production_countries," + 
-    				"ff.original_language AS language, ff.runtime AS duration, ff.vote_count AS vote_count," + 
-    				"ff.vote_average as vote_avg, count(r) as conta " + 
-    				"ORDER BY conta " + 
-    				"DESC LIMIT 10").list();
-
-	    	return result;
-	    }
-	    
-	    
-	    public static List<Film> getTopRatedFilms(){
-	    	List<Record> list;
-	    	List<Film> films = new ArrayList<>();
-	    	
-	    	try(Session session = driver.session()){
-	    		list = session.readTransaction(new TransactionWork<List<Record>>() {
-	    			@Override
-	    			public List<Record> execute(Transaction tx) {	
-	    				return topRatedFilms(tx);
-	    			}
-	    		});
-	    		
-	    		for(Record res: list) {
-	    			String title = res.get("title").asString();
-					String genre = res.get("genre").asString();
-					String plot = res.get("plot").asString();
-					String year = res.get("year").asString();
-					int price = res.get("weeklyPrice").asInt();
-					String production_companies = res.get("production_companies").asString();
-					int budget = res.get("budget").asInt();
-					int revenue = res.get("revenue").asInt();
-					String production_country = res.get("production_countries").asString();
-					String language = res.get("original_language").asString();
-					int runtime = res.get("duration").asInt();
-					int vote_count = res.get("vote_count").asInt();
-					double vote_avg = Double.parseDouble(res.get("vote_avg").asString());
-					
-					films.add(new Film(title, genre, plot, year, price, production_companies, 
-		    				budget, revenue, production_country, language, runtime, vote_count, vote_avg));
-		    		
-		    	} 
-			}
-	    	return films;
-	    } 
-	    
-	    private static List<Record> topRatedFilms(Transaction tx){
-    		List<Record> result=tx.run("MATCH (ff:Movies)-[r:RATES]-() " + 
-    				"RETURN ff.title AS title," + 
-    				"ff.genres AS genre, ff.overview AS plot, ff.release_date AS year," + 
-    				"ff.weeklyPrice AS weeklyPrice, ff.production_companies AS production_companies," + 
-    				"ff.budget AS budget, ff.revenue AS revenue, ff.production_countries AS production_countries," + 
-    				"ff.original_language AS language, ff.runtime AS duration, ff.vote_count AS vote_count," + 
-    				"ff.vote_average as vote_avg, sum(r.vote) as rate " + 
-    				"ORDER BY rate " + 
-    				"DESC LIMIT 10").list();
-
-	    	return result;
-	    }
-	    
-	    //QUERY PER PRENDERE I FILM DI CHI FOLLOWA L'USER, CAMBIANDO LA FRECCIA SI PRENDE I FILM DI CHI è FOLLOWATO DALL'USER
-	    //match (u:Users{username: 'adam'})<-[f:FOLLOWS]-(u2:Users)-[r:RENTS]-(m:Movies)
-	    //return distinct(m.title)
-	    public static List<Film> getFollowingFilms(User u){
-	    	List<Record> list;
-	    	List<Film> films = new ArrayList<>();
-	    	
-	    	try(Session session = driver.session()){
-	    		list = session.readTransaction(new TransactionWork<List<Record>>() {
-	    			@Override
-	    			public List<Record> execute(Transaction tx) {	
-	    				return followingFilms(tx, u);
-	    			}
-	    		});
-	    		
-	    		for(Record res: list) {
-	    			String title = res.get("title").asString();
-					String genre = res.get("genre").asString();
-					String plot = res.get("plot").asString();
-					String year = res.get("year").asString();
-					int price = res.get("weeklyPrice").asInt();
-					String production_companies = res.get("production_companies").asString();
-					int budget = res.get("budget").asInt();
-					int revenue = res.get("revenue").asInt();
-					String production_country = res.get("production_countries").asString();
-					String language = res.get("original_language").asString();
-					int runtime = res.get("duration").asInt();
-					int vote_count = res.get("vote_count").asInt();
-					double vote_avg = Double.parseDouble(res.get("vote_avg").asString());
-					
-					films.add(new Film(title, genre, plot, year, price, production_companies, 
-		    				budget, revenue, production_country, language, runtime, vote_count, vote_avg));
-		    		
-		    	} 
-			}
-
-	    	return films;
-	    } 
-	    
-	    private static List<Record> followingFilms(Transaction tx, User u){
-	    	Map<String, Object> params = new HashMap<>();
-    		params.put("username", u.getUsername());
-    	
-    		List<Record> result=tx.run("MATCH (u:Users)-[t:FOLLOWS]->(u2:Users)-[r:RENTS]-(movie) " + 
-    				"WHERE u.username = $username " + 
-    				"RETURN DISTINCT movie.id as id, movie.title as title, movie.revenue AS revenue," + 
-    				"movie.production_countries AS production_countries, movie.production_companies as production_company," +
-    				"movie.budget as budget, movie.original_language AS original_language, movie.runtime AS duration," + 
-    				"movie.vote_count AS vote_count," +
-    				"movie.release_date as year, movie.overview as plot, movie.genres as genre," + 
-    				"movie.weeklyPrice as weeklyPrice, movie.vote_average as vote_avg", params).list();
-
-	    	return result;
-	    }
-	    
-	    //retrieving all the rentals
-	    public static List<Rental> getRentals(){
-	    	List<Record> list;
-	    	List<Rental> rent = new ArrayList<>();
-	    	
-	    	try(Session session = driver.session()){
-	    		list = session.readTransaction(new TransactionWork<List<Record>>() {
-	    			@Override
-	    			public List<Record> execute(Transaction tx) {	
-	    				return matchUserFilms(tx);
-	    			}
-	    		});
-	    		
-	    		
-	    		for(Record rec: list) {
-					String username = rec.get("username").asString();
-					int price = rec.get("price").asInt();
-					String start_date = rec.get("start_date").asString();
-					LocalDate stDate = LocalDate.parse(start_date);
-					LocalDate eDate = stDate.plusDays(7);
-					String title = rec.get("title").asString();
-					
-					rent.add(new Rental(username, title, stDate, eDate, price));
-		    	} 
-			}
-	    	
-	    	return rent;
-	    } 
-	    
-	    private static List<Record> matchUserFilms(Transaction tx){
-    		
-    		List<Record> result=tx.run("MATCH (ee:Users)-[r:RENTS]-(ff:Movies)"
-	    			+ " RETURN r.date AS start_date, ff.title AS title, ff.weeklyPrice AS price, ee.username AS username"
-	    			).list();
-
-	    	return result;
-	    }
-	    
-	    public static void insertFilm(Film f) {
-	    	try(Session session = driver.session()){
-	    		session.writeTransaction(new TransactionWork<Void>() {
-	    			@Override
-	    			public Void execute(Transaction tx) {
-	    				createFilm(tx, f);
-	    				return null;
-	    			}
-	    		});
-	    	}
-	    	
-	    	return;
-	    }
-	    
-	    private static void createFilm(Transaction tx, Film f) {
-	    	Map<String, Object> params = new HashMap<>();
-     		params.put("title", f.getTitle());
-     		params.put("genre", f.getGenre());
-     		params.put("plot", f.getPlot());
-     		params.put("release_date", f.getReleaseDate());
-     		params.put("weekly_price", f.getWeeklyPrice());
-     		params.put("production_company",f.getProductionCompany());
-     		params.put("budget", f.getBudget());
-     		params.put("revenue", f.getRevenue());
-     		params.put("production_country", f.getProductionCountry());
-     		params.put("language", f.getLanguage());
-     		params.put("runtime", f.getRuntime());
-     		params.put("vote_count", f.getVoteCount());
-     		params.put("vote_avg", Double.toString(f.getVoteAvg()));
-     		
- 	    	tx.run("CREATE(a:Movies{title:$title, genres:$genre, plot:$plot,"
- 	    			+ "release_date:$release_date, weeklyPrice: $weekly_price,"
- 	    			+ "production_companies:$production_company,"
- 	    			+ "budget: $budget, revenue:$revenue, "
- 	    			+ "production_countries: $production_country,"
- 	    			+ "language: $language, runtime:$runtime,"
- 	    			+ "vote_count: $vote_count, vote_average: $vote_avg})", params);
- 	    	
- 	    	return;
-	    }
-	    
-	    
-	    public static List<Film> getSuggestedGenreFilms(User u){
-	    	List<Record> list;
-	    	List<Film> films = new ArrayList<>();
-	    	
-	    	try(Session session = driver.session()){
-	    		list = session.readTransaction(new TransactionWork<List<Record>>() {
-	    			@Override
-	    			public List<Record> execute(Transaction tx) {	
-	    				List<Record> result = new ArrayList<>();
-	    				String genre =  getLatestGenreRented(tx, u);
-	    				
-	    				String[] split = genre.split(",");
-	    				for(int i = 0; i < split.length; i++) {
-	    					List<Record> tmp = getFilmContainGenre(tx, split[i]);
-	    					
-	    					for(int c = 0; c < tmp.size(); c++) {
-	    						result.add(tmp.get(c));
-	    					}
-	    					
-	    				}
-	    				return result;
-	    				
-	    			}
-	    		});
-	    		
-	    		for(Record res: list) {
-	    			boolean contain = false;
-	    			String title = res.get("title").asString();
-	    			for(int i = 0; i < films.size(); i++) {
-	    				if(films.get(i).getTitle().equalsIgnoreCase(title))
-	    					contain = true;
-	    			}
-	    			if(contain) {
-	    				continue;
-	    			}
-					String genre = res.get("genre").asString();
-					String plot = res.get("plot").asString();
-					String year = res.get("year").asString();
-					int price = res.get("weeklyPrice").asInt();
-					String production_companies = res.get("production_companies").asString();
-					int budget = res.get("budget").asInt();
-					int revenue = res.get("revenue").asInt();
-					String production_country = res.get("production_countries").asString();
-					String language = res.get("original_language").asString();
-					int runtime = res.get("duration").asInt();
-					int vote_count = res.get("vote_count").asInt();
-					double vote_avg = Double.parseDouble(res.get("vote_avg").asString());
-					
-					films.add(new Film(title, genre, plot, year, price, production_companies, 
-		    				budget, revenue, production_country, language, runtime, vote_count, vote_avg));
-					
-		    	} 
-			}
-	    	return films;
-	    } 
-	
-	    private static String getLatestGenreRented(Transaction tx, User u){
-	    	Map<String, Object> params = new HashMap<>();
-     		params.put("username",u.getUsername());
-    		List<Record> result=tx.run("MATCH (m:Movies)-[r:RENTS]-(u:Users) "+
-    				"WHERE u.username=$username"
-	    			+ " RETURN m.genres as genre "+
-    				"order by r.date "+
-	    			"desc limit 1", params).list();
-    		String genre = null;
-    		
-    		for(Record r : result) {
-    			genre = r.get("genre").asString();
-    		}
-	    	return genre;
-	    }
-	    
-	    private static List<Record> getFilmContainGenre(Transaction tx, String genre){
-	    	Map<String, Object> params = new HashMap<>();
-     		params.put("genre",genre);
-    		List<Record> result=tx.run("MATCH (movie:Movies) "+
-    				"where movie.genres contains $genre "+
-    				"return movie.id as id, movie.title as title, movie.production_countries AS production_countries, movie.production_companies as production_company," +
-    				"movie.budget as budget, movie.original_language AS original_language, movie.runtime AS duration," + 
-    				"movie.vote_count AS vote_count, movie.revenue as revenue, " +
-    				"movie.release_date as year, movie.overview as plot, movie.genres as genre," + 
-    				"movie.weeklyPrice as weeklyPrice, movie.vote_average as vote_avg", params).list();
-    		
-	    	return result;
-	    }
+	    	    
 }

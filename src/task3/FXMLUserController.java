@@ -248,10 +248,14 @@ public class FXMLUserController implements Initializable {
 				
 
 				//decreasing user's credit and updating the value
-				//current_user.setCredit(current_user.getCredit() - tot);
-				//UserEntityManager.updateUserInfo(current_user);
+				current_user.setCredit(current_user.getCredit() - tot);
+				int new_credit = current_user.getCredit() - tot;
+				UserEntityManager.updateUserCredit(current_user, new_credit);
 		
 				film_in_cart.clear();
+
+				genre_film.addAll(UserEntityManager.getSuggestedGenreFilms(current_user));
+				film_genre_table.setItems(genre_film);
 			}
 		}
 		
@@ -265,6 +269,8 @@ public class FXMLUserController implements Initializable {
 		following_film.addAll(UserEntityManager.getFollowingFilms(this.current_user));
 		following_film_table.setItems(following_film);
 		genre_film.addAll(UserEntityManager.getSuggestedGenreFilms(current_user));
+		film_genre_table.setItems(genre_film);
+		
 	}
 	
 	
@@ -273,8 +279,6 @@ public class FXMLUserController implements Initializable {
 		rentals.clear();
 		User tmp;
 	
-        //tmp = new User(UserEntityManager.refreshUser(current_user));
-        //current_user = tmp;
         rentals.addAll(UserEntityManager.getRentals(current_user));
 	}
 	
@@ -284,8 +288,6 @@ public class FXMLUserController implements Initializable {
 		all_user.clear();
 		User tmp;
 	
-        //tmp = new User(UserEntityManager.refreshUser(current_user));
-        //current_user = tmp;
         followed.addAll(UserEntityManager.getFollowed(current_user));
         all_user.addAll(UserEntityManager.getUsersToFollow(current_user));
         
