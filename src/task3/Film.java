@@ -11,7 +11,7 @@ import javafx.beans.property.*;
 
 public class Film {
 	private final String title;
-	private String genre;
+	private final String genre;
 	private final String plot;
 	private final String release_date;
 	private final int weekly_price;
@@ -133,9 +133,6 @@ public class Film {
 	}
 	public void setVoteAvg(double vote) {
 		this.vote_avg = vote;
-	}
-	public void setGenre(String genres) {
-		this.genre = genres;
 	}
 
 	
