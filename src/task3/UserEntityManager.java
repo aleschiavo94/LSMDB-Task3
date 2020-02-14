@@ -31,7 +31,6 @@ public class UserEntityManager {
 	    // Driver objects are thread-safe and are typically made available application-wide.
 	    private static Driver driver;
 	    private static int count = 0;
-	    //private static UserEntityManager userEntityManager;
 	    
 	    public static void start(){	
 	    	//Constructing the Driver instance on startup
@@ -179,15 +178,13 @@ public class UserEntityManager {
 	    			public List<Film> execute(Transaction tx) {
 	    				List<Film> films = new ArrayList<>();
 	    				StatementResult res = matchFilms(tx);
-	    				//System.out.println(res.list().size());
-	    				//int i  = 0;
 	    				Record rec;
 	    				while(res.hasNext()) {
 	    					rec = res.next();
 	    					
 	    		    		//int id = rec.get("id").asInt();
 	    					String title = rec.get("title").asString();
-	    					String genre = rec.get("genre").asString();
+	    					String genre = getGenreByMovie(title);
 	    					String plot = rec.get("plot").asString();
 	    					String year = rec.get("year").asString();
 	    					int price = rec.get("weeklyPrice").asInt();
@@ -200,7 +197,7 @@ public class UserEntityManager {
 	    					int vote_count = rec.get("vote_count").asInt();
 	    					double vote_avg = Double.parseDouble(rec.get("vote_avg").asString());
 	    					
-	    		    		films.add(new Film(/*id,*/ title, genre, plot, year, price, production_companies, 
+	    		    		films.add(new Film(title, genre, plot, year, price, production_companies, 
 	    		    				budget, revenue, production_country, language, runtime, vote_count, vote_avg));
 	    		    		
 	    		    	}
@@ -640,7 +637,7 @@ public class UserEntityManager {
 	    		
 	    		for(Record res: list) {
 	    	  		String title = res.get("title").asString();
-					String genre = res.get("genre").asString();
+					String genre = getGenreByMovie(title);
 					String plot = res.get("plot").asString();
 					String year = res.get("year").asString();
 					int price = res.get("weeklyPrice").asInt();
@@ -663,8 +660,7 @@ public class UserEntityManager {
 	    private static List<Record> topRentedFilms(Transaction tx){
     		
     		List<Record> result=tx.run("MATCH (ff:Movies)-[r:RENTS]-() " + 
-    				"RETURN ff.title AS title," + 
-    				"ff.genres AS genre, ff.overview AS plot, ff.release_date AS year," + 
+    				"RETURN ff.title AS title, ff.overview AS plot, ff.release_date AS year," + 
     				"ff.weeklyPrice AS weeklyPrice, ff.production_companies AS production_companies," + 
     				"ff.budget AS budget, ff.revenue AS revenue, ff.production_countries AS production_countries," + 
     				"ff.original_language AS language, ff.runtime AS duration, ff.vote_count AS vote_count," + 
@@ -690,7 +686,7 @@ public class UserEntityManager {
 	    		
 	    		for(Record res: list) {
 	    			String title = res.get("title").asString();
-					String genre = res.get("genre").asString();
+					String genre = getGenreByMovie(title);
 					String plot = res.get("plot").asString();
 					String year = res.get("year").asString();
 					int price = res.get("weeklyPrice").asInt();
@@ -713,8 +709,7 @@ public class UserEntityManager {
 	    
 	    private static List<Record> topRatedFilms(Transaction tx){
     		List<Record> result=tx.run("MATCH (ff:Movies)-[r:RATES]-() " + 
-    				"RETURN ff.title AS title," + 
-    				"ff.genres AS genre, ff.overview AS plot, ff.release_date AS year," + 
+    				"RETURN ff.title AS title, ff.overview AS plot, ff.release_date AS year," + 
     				"ff.weeklyPrice AS weeklyPrice, ff.production_companies AS production_companies," + 
     				"ff.budget AS budget, ff.revenue AS revenue, ff.production_countries AS production_countries," + 
     				"ff.original_language AS language, ff.runtime AS duration, ff.vote_count AS vote_count," + 
@@ -740,7 +735,7 @@ public class UserEntityManager {
 	    		
 	    		for(Record res: list) {
 	    			String title = res.get("title").asString();
-					String genre = res.get("genre").asString();
+					String genre = getGenreByMovie(title);
 					String plot = res.get("plot").asString();
 					String year = res.get("year").asString();
 					int price = res.get("weeklyPrice").asInt();
@@ -771,8 +766,7 @@ public class UserEntityManager {
     				"RETURN DISTINCT movie.id as id, movie.title as title, movie.revenue AS revenue," + 
     				"movie.production_countries AS production_countries, movie.production_companies as production_company," +
     				"movie.budget as budget, movie.original_language AS original_language, movie.runtime AS duration," + 
-    				"movie.vote_count AS vote_count," +
-    				"movie.release_date as year, movie.overview as plot, movie.genres as genre," + 
+    				"movie.vote_count AS vote_count, movie.release_date as year, movie.overview as plot," + 
     				"movie.weeklyPrice as weeklyPrice, movie.vote_average as vote_avg", params).list();
 
 	    	return result;
@@ -808,7 +802,6 @@ public class UserEntityManager {
 	    } 
 	    
 	    private static List<Record> matchUserFilms(Transaction tx){
-    		
     		List<Record> result=tx.run("MATCH (ee:Users)-[r:RENTS]-(ff:Movies)"
 	    			+ " RETURN r.date AS start_date, ff.title AS title, ff.weeklyPrice AS price, ee.username AS username"
 	    			).list();
@@ -823,6 +816,7 @@ public class UserEntityManager {
 	    			@Override
 	    			public Void execute(Transaction tx) {
 	    				createFilm(tx, f);
+	    				createGenreRelation(tx, f);
 	    				return null;
 	    			}
 	    		});
@@ -831,6 +825,7 @@ public class UserEntityManager {
 	    	return;
 	    }
 	    
+	    //query to create new film
 	    private static void createFilm(Transaction tx, Film f) {
 	    	Map<String, Object> params = new HashMap<>();
      		params.put("title", f.getTitle());
@@ -858,6 +853,52 @@ public class UserEntityManager {
  	    	return;
 	    }
 	    
+	    private static void createGenreRelation(Transaction tx, Film f) {
+	    	Map<String, Object> params = new HashMap<>();
+     		params.put("title", f.getTitle());
+     		params.put("genre", f.getGenre());
+     		
+ 	    	tx.run("MATCH (m:Movies), (g:Genre) " + 
+ 	    			"WHERE m.title = $title " + 
+ 	    			"AND m.genres CONTAINS g.type " + 
+ 	    			"CREATE (m)-[:IS]->(g)", params);
+ 	    	
+ 	    	return;
+	    }
+	    
+	    //query to find the genre by movie title
+	    public static String getGenreByMovie(String title) {
+	    	List<Record> list;
+	    	String genres = "";
+	    	
+	    	try(Session session = driver.session()){
+	    		list = session.readTransaction(new TransactionWork<List<Record>>() {
+	    			@Override
+	    			public List<Record> execute(Transaction tx) {	
+	    				return getFilmGenre(tx, title);
+	    			}
+	    		});
+	    		for(Record res: list) {
+	    			genres += res.get("type").asString() + ",";
+		    	}
+	    		if(genres.length() > 0)
+	    			genres = genres.substring(0, genres.length()-1);
+			}
+
+	    	return genres;
+	    }
+	    
+	    private static List<Record> getFilmGenre(Transaction tx, String title){
+	    	Map<String, Object> params = new HashMap<>();
+     		params.put("title", title);
+     		List<Record> result = tx.run("MATCH (m:Movies)-[:IS]->(g:Genre)" + 
+     				"WHERE m.title = $title " + 
+     				"RETURN g.type AS type", params).list();
+  
+	    	return result;
+	    }
+	    
+	    
 	    //query to find film that have the same genre as the last rented movie
 	    public static List<Film> getSuggestedGenreFilms(User u){
 	    	List<Record> list;
@@ -867,34 +908,13 @@ public class UserEntityManager {
 	    		list = session.readTransaction(new TransactionWork<List<Record>>() {
 	    			@Override
 	    			public List<Record> execute(Transaction tx) {	
-	    				List<Record> result = new ArrayList<>();
-	    				String genre =  getLatestGenreRented(tx, u);
-	    				if(genre == null)
-	    					return result;
-	    				
-	    				String[] split = genre.split(",");
-	    				for(int i = 0; i < split.length; i++) {
-	    					List<Record> tmp = getFilmContainGenre(tx, split[i]);
-	    					
-	    					for(int c = 0; c < tmp.size(); c++) {
-	    						result.add(tmp.get(c));
-	    					}
-	    				}
-	    				return result;
+	    				return getLatestGenreRented(tx, u);
 	    			}
 	    		});
 	    		
 	    		for(Record res: list) {
-	    			boolean contain = false;
 	    			String title = res.get("title").asString();
-	    			for(int i = 0; i < films.size(); i++) {
-	    				if(films.get(i).getTitle().equalsIgnoreCase(title))
-	    					contain = true;
-	    			}
-	    			if(contain) {
-	    				continue;
-	    			}
-					String genre = res.get("genre").asString();
+					String genre = getGenreByMovie(title);
 					String plot = res.get("plot").asString();
 					String year = res.get("year").asString();
 					int price = res.get("weeklyPrice").asInt();
@@ -909,41 +929,27 @@ public class UserEntityManager {
 					
 					films.add(new Film(title, genre, plot, year, price, production_companies, 
 		    				budget, revenue, production_country, language, runtime, vote_count, vote_avg));
-					
+		    		
 		    	} 
 			}
+
 	    	return films;
 	    } 
 	
-	    private static String getLatestGenreRented(Transaction tx, User u){
+	    private static List<Record> getLatestGenreRented(Transaction tx, User u){
 	    	Map<String, Object> params = new HashMap<>();
      		params.put("username",u.getUsername());
-    		List<Record> result=tx.run("MATCH (m:Movies)-[r:RENTS]-(u:Users) "+
-    				"WHERE u.username=$username"
-	    			+ " RETURN m.genres as genre "+
-    				"order by r.date "+
-	    			"desc limit 1", params).list();
-    		String genre = null;
-    		
-    		for(Record r : result) {
-    			genre = r.get("genre").asString();
-    		}
-	    	return genre;
-	    }
-	    
-	    private static List<Record> getFilmContainGenre(Transaction tx, String genre){
-	    	Map<String, Object> params = new HashMap<>();
-     		params.put("genre",genre);
-    		List<Record> result=tx.run("MATCH (movie:Movies) "+
-    				"where movie.genres contains $genre "+
-    				"return movie.id as id, movie.title as title, movie.production_countries AS production_countries, movie.production_companies as production_company," +
-    				"movie.budget as budget, movie.original_language AS original_language, movie.runtime AS duration," + 
-    				"movie.vote_count AS vote_count, movie.revenue as revenue, " +
-    				"movie.release_date as year, movie.overview as plot, movie.genres as genre," + 
-    				"movie.weeklyPrice as weeklyPrice, movie.vote_average as vote_avg", params).list();
-    		
+     		List<Record> result = tx.run("MATCH (mm:Movies)-[:IS]->(gg:Genre)<-[:IS]-(m:Movies)<-[r:RENTS]-(u:Users) " + 
+     				"WHERE u.username = $username  AND mm.title <> m.title " + 
+     				"RETURN mm.title AS title, mm.production_countries AS production_countries, mm.production_companies AS production_company," + 
+     				"mm.budget AS budget, mm.original_language AS original_language, mm.runtime AS duration," + 
+     				"mm.vote_count AS vote_count, mm.revenue AS revenue," + 
+     				"mm.release_date AS year, mm.overview AS plot," + 
+     				"mm.weeklyPrice AS weeklyPrice, mm.vote_average AS vote_avg " + 
+     				"ORDER BY r.date DESC LIMIT 10", params).list();
+  
 	    	return result;
-	    }    
+	    }
 	    
 	    /*
 	     * ADMIN CONTROLLER FUNCTIONS
@@ -1029,8 +1035,7 @@ public class UserEntityManager {
 	    			, params).list();
 
 	    	return result;
-	    }
-	    
+	    }	    
 	    
 	    //deleting the user and all the rentals
 	    public static void removeUser(User user) {
