@@ -879,10 +879,8 @@ public class UserEntityManager {
 	    					for(int c = 0; c < tmp.size(); c++) {
 	    						result.add(tmp.get(c));
 	    					}
-	    					
 	    				}
 	    				return result;
-	    				
 	    			}
 	    		});
 	    		

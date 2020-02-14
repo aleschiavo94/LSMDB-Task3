@@ -135,12 +135,12 @@
                         <Font size="14.0" />
                      </font>
                   </TextField>
-                        <TableView fx:id="all_user_table" layoutX="84.0" layoutY="150.0" onMouseClicked="#showDetails" prefHeight="350.0" prefWidth="195.0">
+                        <TableView fx:id="all_user_table" layoutX="84.0" layoutY="150.0" prefHeight="350.0" prefWidth="195.0">
                            <columns>
                               <TableColumn fx:id="all_user_column" editable="false" prefWidth="195.0" text="Username" />
                            </columns>
                         </TableView>
-                        <TableView fx:id="followed_table" layoutX="309.0" layoutY="150.0" onMouseClicked="#showDetails" prefHeight="289.0" prefWidth="195.0">
+                        <TableView fx:id="followed_table" layoutX="309.0" layoutY="150.0" prefHeight="289.0" prefWidth="195.0">
                            <columns>
                               <TableColumn fx:id="username_followed_column" editable="false" prefWidth="195.0" text="Username" />
                            </columns>
