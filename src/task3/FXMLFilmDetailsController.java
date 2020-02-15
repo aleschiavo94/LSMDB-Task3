@@ -61,12 +61,10 @@ public class FXMLFilmDetailsController implements Initializable{
 
 	//inizializing with the current film's informations
 	public void setInfo(Film f, List<Film> list, User u) {
-		
 		this.current_user = new User(u); 
 		
 		this.current_film = new Film(f);
 		this.list = list;
-		
 		
 		title_label.setText(f.getTitle());
 		genre_label.setText(f.getGenre());
@@ -134,8 +132,6 @@ public class FXMLFilmDetailsController implements Initializable{
 			
 			//disabling the button to not rate again
 			submit_button.setDisable(true);
-			list.clear();
-			list.addAll(UserEntityManager.getFilms());
 	}
 	
 	public void initialize(URL url, ResourceBundle rb) {

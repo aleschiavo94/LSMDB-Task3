@@ -406,16 +406,6 @@ public class FXMLUserController implements Initializable {
 	
 	//inizializing the profile with current user's informations
 	public void initUserInfo() {
-		
-		//refresh of user info in case one or more rental are done in this session and the user want to delete the account 
-		//immediately after that
-		
-		//User tmp = current_user;
-		
-		//tmp = new User(UserEntityManager.refreshUser(current_user));
-		//current_user = tmp;
-		
-		
 		this.infouser_username_field.setText(current_user.getUsername());
 		this.infouser_name_field.setText(current_user.getName());
 		this.infouser_surname_field.setText(current_user.getSurname());
@@ -480,8 +470,7 @@ public class FXMLUserController implements Initializable {
 		if(!current_user.getPassword().equals(currpass)) {
 			errorInfoUser();
 			return;
-		}
-		
+		}		
 	
 		UserEntityManager.removeUser(current_user);
 		

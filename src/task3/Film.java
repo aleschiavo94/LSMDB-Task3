@@ -134,7 +134,6 @@ public class Film {
 	public void setVoteAvg(double vote) {
 		this.vote_avg = vote;
 	}
-
 	
 	public Film(Film f){
         this.title = f.getTitle();
